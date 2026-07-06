@@ -1,0 +1,7 @@
+# secrets & session state never belong in git
+.env
+data/
+**/trumf_state.json
+**/trumf_tokens.json
+**/*.png
+**/login.log

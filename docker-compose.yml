@@ -1,0 +1,25 @@
+# Grocery bonus tooling — Trumf (NorgesGruppen: Kiwi/Meny/Spar/Joker).
+# Secrets + session state live OUTSIDE this repo at /srv/docker/grocery/ (see .env / data mount).
+services:
+  trumf-fetch:
+    build: .
+    image: grocery-trumf:latest
+    container_name: grocery-trumf-fetch
+    env_file: /srv/docker/grocery/.env
+    environment:
+      - TRUMF_STATE=/data/trumf_state.json
+      - TZ=Europe/Oslo
+    volumes:
+      - /srv/docker/grocery/data:/data
+    restart: "no"        # run on a schedule: `docker compose run --rm trumf-fetch` (see grocery.timer)
+
+  # Re-auth only when the session cookie expires (interactive: enter SMS code).
+  trumf-login:
+    build: ./login
+    image: grocery-trumf-login:latest
+    profiles: ["login"]
+    env_file: /srv/docker/grocery/.env
+    environment: [PLAYWRIGHT_BROWSERS_PATH=/ms-playwright]
+    volumes:
+      - /srv/docker/grocery:/work
+      - /srv/docker/grocery/data:/data
