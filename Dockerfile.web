@@ -1,0 +1,7 @@
+# grocery web GUI (Trumf + Rema dashboard + receipt export)
+FROM python:3.12-slim
+RUN pip install --no-cache-dir flask requests reportlab waitress
+COPY app/webgui.py /app/webgui.py
+WORKDIR /app
+ENV PORT=3012 GROCERY_DATA=/data
+CMD ["waitress-serve","--host=0.0.0.0","--port=3012","webgui:app"]

@@ -21,6 +21,16 @@ services:
     volumes: [/srv/docker/grocery/data:/data]
     restart: "no"
 
+  web:
+    build: {context: ., dockerfile: Dockerfile.web}
+    image: grocery-web:latest
+    container_name: grocery-web
+    env_file: /srv/docker/grocery/.env
+    environment: [GROCERY_DATA=/data, TZ=Europe/Oslo]
+    volumes: [/srv/docker/grocery/data:/data]
+    ports: ["127.0.0.1:3012:3012"]
+    restart: unless-stopped
+
   # (re)login — interactive, enter the SMS code when prompted. Run when tokens expire.
   trumf-login:
     build: ./login
