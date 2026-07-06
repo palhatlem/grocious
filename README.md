@@ -5,7 +5,7 @@ grocery APIs — no phone app required. Built because the Trumf/Coop/Rema apps a
 pain (or impossible) on de-Googled Android (GrapheneOS). Runs as small containers.
 
 Implements **Trumf / NorgesGruppen** (Kiwi, Meny, Spar, Joker) and **Rema 1000 (Æ)** —
-including **auto-activation of all available personalized offers** for Rema. Coop is planned.
+tracking bonus, receipts and offers (coupons are **not** auto-activated � by choice). Coop is planned.
 
 ## How it works
 - `login/` — one-time (or ~yearly) **Playwright** re-auth: drives trumf.no's NextAuth →
@@ -33,7 +33,7 @@ change without notice; monitor the fetch job.
 
 ## Roadmap
 - [x] **Trumf** — bonus balance, receipts, offers
-- [x] **Rema 1000 (Æ)** — offers + receipts + **auto-activate all offers**
+- [x] **Rema 1000 (Æ)** — offers + receipts (activation available but opt-in, not automatic)
 - [ ] **Coop** — Auth0 login; receipts, coupons/offers (in progress)
 - [ ] **Web GUI** at `grocery.<domain>` — dashboard + one-click receipt export (PDF / JPG / JSON / CSV)
 - [ ] Scheduled fetch/activate + ntfy summary

@@ -33,6 +33,12 @@ def get(path, tok):
         tok.update(refresh(tok)); r=requests.get(API+path, headers=headers(tok), timeout=30)
     return r
 
+
+def activate_offers(tok, codes):
+    """OPT-IN: activate specific Rema offers (POST array of codes). NOT called automatically."""
+    r=requests.post(API+"/v1/bella/offers/activate", headers=headers(tok), json=list(codes), timeout=30)
+    return r.status_code, r.ok
+
 def main():
     tok=json.load(open(TOKENS))
     tok=refresh(tok)   # always start fresh (1h expiry)
@@ -40,16 +46,12 @@ def main():
     heads=get("/v1/bella/transaction/v2/heads", tok)
     oj=offers.json() if offers.ok else None
     olist=oj if isinstance(oj,list) else (oj.get("offers") if isinstance(oj,dict) else []) or []
-    to_activate=[o["code"] for o in olist if not o.get("activated")]
-    activated_now=0
-    if to_activate:
-        ar=requests.post(API+"/v1/bella/offers/activate", headers=headers(tok), json=to_activate, timeout=30)
-        activated_now=len(to_activate) if ar.ok else 0
-        print(f"activated {activated_now}/{len(to_activate)} offers (status {ar.status_code})")
+    offers_active=sum(1 for o in olist if o.get("activated"))
+    # NOTE: coupons are NOT auto-activated (deliberate). Use activate_offers() manually if wanted.
     hj=heads.json() if heads.ok else None
     out={
         "offers_status":offers.status_code,
-        "offers_activated_now": activated_now,
+        "offers_activated": offers_active,
         "offers_available": len(oj) if isinstance(oj,list) else (len(oj.get("offers",[])) if isinstance(oj,dict) else None),
         "receipts_status":heads.status_code,
         "purchase_total": (hj or {}).get("purchaseTotal") if isinstance(hj,dict) else None,
