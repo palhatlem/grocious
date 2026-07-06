@@ -4,8 +4,8 @@ Pull your loyalty **bonus balance, receipts and campaign offers** straight from 
 grocery APIs — no phone app required. Built because the Trumf/Coop/Rema apps are a
 pain (or impossible) on de-Googled Android (GrapheneOS). Runs as small containers.
 
-Currently implements **Trumf / NorgesGruppen** (Kiwi, Meny, Spar, Joker). Rema 1000 (Æ)
-and Coop are planned (their APIs are documented; see credits).
+Implements **Trumf / NorgesGruppen** (Kiwi, Meny, Spar, Joker) and **Rema 1000 (Æ)** —
+including **auto-activation of all available personalized offers** for Rema. Coop is planned.
 
 ## How it works
 - `login/` — one-time (or ~yearly) **Playwright** re-auth: drives trumf.no's NextAuth →
