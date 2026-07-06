@@ -30,6 +30,14 @@ Your own loyalty account, personal use. Secrets (`.env`) and the session cookie 
 `.gitignore`d and never committed. The grocery APIs are unofficial/reverse-engineered — they can
 change without notice; monitor the fetch job.
 
+
+## Roadmap
+- [x] **Trumf** — bonus balance, receipts, offers
+- [x] **Rema 1000 (Æ)** — offers + receipts + **auto-activate all offers**
+- [ ] **Coop** — Auth0 login; receipts, coupons/offers (in progress)
+- [ ] **Web GUI** at `grocery.<domain>` — dashboard + one-click receipt export (PDF / JPG / JSON / CSV)
+- [ ] Scheduled fetch/activate + ntfy summary
+
 ## Credits
 Reverse-engineering groundwork: [HelgeSverre](https://helgesver.re/articles/reverse-engineering-norwegian-grocery-apps)
 and [HelgeSverre's gist](https://gist.github.com/HelgeSverre/80a7f34f874336324184a0c513c2e6a2);
