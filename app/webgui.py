@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """grocious.bauneveien.no — self-hosted grocery dashboard (Trumf + Rema).
-Bonus balances, offers, and receipts with JSON/CSV/PDF download. Read-only.
-Behind tinyauth; binds 127.0.0.1. Tokens/session read from /data."""
+Bonus, offers/coupons (with manual activate), receipts + JSON/CSV/PDF export.
+Read-only except opt-in Rema offer activation. Behind tinyauth; binds 127.0.0.1."""
 import json, os, io, csv, re, uuid, datetime, functools
 import requests
-from flask import Flask, Response, render_template_string, abort
+from flask import Flask, Response, render_template_string, redirect, abort
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
@@ -19,11 +19,11 @@ def _cache(ttl):
             if a not in box or now - box[a][0] > ttl:
                 box[a] = (now, fn(*a))
             return box[a][1]
+        wrap.clear = box.clear
         return wrap
     return deco
 
 def _rsc_objects(txt, must_have):
-    """Brace-match JSON objects in a Next.js RSC stream that contain `must_have`."""
     out = []
     for m in re.finditer('"' + must_have + '"', txt):
         start = txt.rfind("{", 0, m.start())
@@ -39,7 +39,7 @@ def _rsc_objects(txt, must_have):
                     break
     return out
 
-# ---------------- Trumf (session cookie + RSC) ----------------
+# ---------------- Trumf ----------------
 def trumf_session():
     st = json.load(open(f"{DATA}/trumf_state.json"))
     s = requests.Session()
@@ -64,13 +64,13 @@ def trumf_data():
             bid = o.get("batchId")
             if not bid or bid in seen or "belop" not in o: continue
             seen.add(bid)
-            d = (o.get("bonusberegningTidspunkt") or "").replace("$D", "")[:10]
-            recs.append({"id": bid, "date": d, "store": o.get("beskrivelse"), "amount": o.get("belop"),
-                         "bonus": o.get("bonus"), "chain": o.get("filterCategory"), "hasReceipt": o.get("harKvittering")})
+            recs.append({"id": bid, "date": (o.get("bonusberegningTidspunkt") or "").replace("$D", "")[:10],
+                         "store": o.get("beskrivelse"), "amount": o.get("belop"), "bonus": o.get("bonus"),
+                         "chain": o.get("filterCategory"), "hasReceipt": o.get("harKvittering")})
         recs.sort(key=lambda x: x["date"], reverse=True)
         return {"ok": True, "saldo": saldo.get("trumfSaldo"), "akkumulert": saldo.get("totaltAkkumulertTrumf"),
                 "oppdatert": (saldo.get("sistOppdatert") or "")[:10], "count": len(recs), "receipts": recs,
-                "offers": [{"tittel": o.get("visningsTekst"), "tekst": o.get("beskrivelse")}
+                "offers": [{"title": o.get("visningsTekst"), "desc": o.get("beskrivelse")}
                            for o in (offers if isinstance(offers, list) else [])]}
     except Exception as e:
         return {"ok": False, "err": str(e)}
@@ -84,8 +84,7 @@ def trumf_lines(bid):
         if g in seen: continue
         seen.add(g)
         ean = o.get("ean"); ean = None if ean == "$undefined" else ean
-        out.append({"name": o.get("produktBeskrivelse"), "ean": ean, "qty": o.get("antall"),
-                    "amount": o.get("belop"), "bonus": o.get("bonus")})
+        out.append({"name": o.get("produktBeskrivelse"), "ean": ean, "qty": o.get("antall"), "amount": o.get("belop")})
     return out
 
 # ---------------- Rema ----------------
@@ -110,7 +109,9 @@ def rema_data():
                for t in heads.get("transactions", [])]
         txs.sort(key=lambda x: x["date"], reverse=True)
         return {"ok": True, "purchaseTotal": heads.get("purchaseTotal"), "discountTotal": heads.get("discountTotal"),
-                "count": len(txs), "receipts": txs, "offers": [{"desc": o.get("desc")} for o in olist]}
+                "count": len(txs), "receipts": txs,
+                "offers": [{"code": o.get("code"), "desc": o.get("desc"), "activated": o.get("activated"),
+                            "img": o.get("dutyText") if str(o.get("dutyText", "")).startswith("http") else None} for o in olist]}
     except Exception as e:
         return {"ok": False, "err": str(e)}
 
@@ -118,9 +119,12 @@ def rema_lines(tid):
     rows = requests.get(f"https://api.rema.no/v1/bella/transaction/v2/rows/{tid}", headers=rema_headers(), timeout=20).json()
     rows = rows if isinstance(rows, list) else rows.get("rows", [])
     return [{"name": r.get("productDescription") or r.get("prodtxt1"), "ean": r.get("prodtxt3"),
-             "qty": r.get("quantity", 1), "amount": r.get("amount"), "discount": r.get("discount", 0)} for r in rows]
+             "qty": r.get("quantity", 1), "amount": r.get("amount")} for r in rows]
 
-# ---------------- rendering ----------------
+def rema_activate(code):
+    requests.post("https://api.rema.no/v1/bella/offers/activate", headers=rema_headers(), json=[code], timeout=20)
+
+# ---------------- downloads ----------------
 def _download(chain, rid, fmt, lines, title):
     if fmt == "json":
         return Response(json.dumps({"id": rid, "lines": lines}, ensure_ascii=False, indent=2),
@@ -146,50 +150,91 @@ def _download(chain, rid, fmt, lines, title):
 
 TPL = """<!doctype html><html lang=nb><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
 <title>grocious</title><style>
-:root{--bg:#15171c;--card:#1e2129;--fg:#e6e8ec;--mut:#9aa0aa;--pos:#5fd08a;--neg:#e8735a;--acc:#7aa2f7}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,sans-serif}
-.wrap{max-width:980px;margin:0 auto;padding:20px}h1{font-size:20px}h2{font-size:16px;color:var(--mut);margin:26px 0 8px}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:640px){.cards{grid-template-columns:1fr}}
-.card{background:var(--card);border-radius:12px;padding:16px}.big{font-size:28px;font-weight:600}
-.mut{color:var(--mut)}.pos{color:var(--pos)}.row{display:flex;justify-content:space-between;padding:3px 0}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:7px 8px;border-bottom:1px solid #2a2e37}
-th{color:var(--mut);font-weight:500}a{color:var(--acc);text-decoration:none}a:hover{text-decoration:underline}
-.dl a{margin-right:8px;font-size:12px}.tag{display:inline-block;background:#2a2e37;border-radius:6px;padding:1px 7px;font-size:12px;margin:2px 4px 2px 0}
-.err{color:var(--neg)}.rt{text-align:right}</style></head><body><div class=wrap>
-<h1>🛒 grocious <span class=mut style="font-size:13px">· therack</span></h1>
+:root{--bg:#0f1116;--card:#1a1d26;--line:#262b36;--fg:#eceef2;--mut:#8b93a1;--pos:#5fd08a;--neg:#e8735a;
+--trumf:#9b8cff;--rema:#4a90d9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px 48px}
+header{background:linear-gradient(120deg,#1c1740,#132033 60%,#0f1116);border-radius:0 0 20px 20px;padding:26px 24px 22px;margin:0 -20px 24px}
+.brand{font-size:26px;font-weight:700;letter-spacing:-.5px}.brand .cart{filter:drop-shadow(0 2px 6px #0006)}
+.tag-line{color:var(--mut);font-size:13px;margin-top:2px}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:30px 0 12px;font-weight:600}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:640px){.cards{grid-template-columns:1fr}}
+.stat{background:var(--card);border-radius:16px;padding:18px 20px;border-left:4px solid var(--line);box-shadow:0 1px 0 #ffffff08 inset}
+.stat.trumf{border-left-color:var(--trumf)}.stat.rema{border-left-color:var(--rema)}
+.stat .name{font-weight:600;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
+.big{font-size:32px;font-weight:700;margin:4px 0 6px}.row{display:flex;justify-content:space-between;padding:2px 0;font-size:14px}
+.mut{color:var(--mut)}.pos{color:var(--pos)}.rt{text-align:right}
+.offers{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.offer{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.offer img{width:100%;height:120px;object-fit:cover;background:#0c0e13}
+.offer .b{padding:12px 13px;display:flex;flex-direction:column;gap:8px;flex:1}
+.badge{align-self:flex-start;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.badge.trumf{background:#2a2350;color:#c3b8ff}.badge.rema{background:#173049;color:#9fc7ef}
+.offer .t{font-size:14px;font-weight:500;line-height:1.35;flex:1}
+.btn{border:0;border-radius:9px;padding:8px 12px;font-weight:600;font-size:13px;cursor:pointer;background:var(--rema);color:#fff}
+.btn:hover{filter:brightness(1.1)}.done{color:var(--pos);font-size:13px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:500}tr:hover td{background:#ffffff05}
+a{color:#7aa2f7;text-decoration:none}a:hover{text-decoration:underline}
+.dl a{margin-right:9px;font-size:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+summary{padding:14px 18px;cursor:pointer;font-weight:600;list-style:none}summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--mut)}details[open] summary::before{content:"▾ "}
+details .inner{padding:0 8px 8px}.err{color:var(--neg)}.pill{display:inline-block;background:var(--line);border-radius:20px;padding:1px 9px;font-size:12px;color:var(--mut);margin-left:6px}
+</style></head><body>
+<header><div class=wrap style="padding:0"><div class=brand><span class=cart>🛒</span> grocious</div>
+<div class=tag-line>dagligvarebonus &amp; kvitteringer · therack</div></div></header>
+<div class=wrap>
 <div class=cards>
- <div class=card><div class=mut>Trumf bonus</div>
+ <div class="stat trumf"><div class=name>Trumf</div>
   {% if t.ok %}<div class="big pos">{{ '%.2f'|format(t.saldo) }} kr</div>
    <div class=row><span class=mut>Akkumulert</span><span>{{ '%.0f'|format(t.akkumulert) }} kr</span></div>
    <div class=row><span class=mut>Kvitteringer</span><span>{{ t.count }}</span></div>
    <div class=row><span class=mut>Kampanjer</span><span>{{ t.offers|length }}</span></div>
-  {% else %}<div class=err>Trumf: {{ t.err }}</div>{% endif %}</div>
- <div class=card><div class=mut>Rema 1000</div>
+  {% else %}<div class=err>{{ t.err }}</div>{% endif %}</div>
+ <div class="stat rema"><div class=name>Rema 1000</div>
   {% if r.ok %}<div class=big>{{ '%.0f'|format(r.purchaseTotal) }} kr</div>
    <div class=row><span class=mut>Rabatt spart</span><span class=pos>{{ '%.0f'|format(r.discountTotal) }} kr</span></div>
    <div class=row><span class=mut>Kvitteringer</span><span>{{ r.count }}</span></div>
    <div class=row><span class=mut>Tilbud</span><span>{{ r.offers|length }}</span></div>
-  {% else %}<div class=err>Rema: {{ r.err }}</div>{% endif %}</div>
+  {% else %}<div class=err>{{ r.err }}</div>{% endif %}</div>
 </div>
-{% if t.ok and t.offers %}<h2>Trumf-kampanjer</h2>{% for o in t.offers %}<span class=tag title="{{o.tekst}}">{{ o.tittel }}</span>{% endfor %}{% endif %}
-{% if t.ok and t.receipts %}<h2>Trumf-kvitteringer</h2>
+
+<h2>Tilbud &amp; kuponger <span class=pill>aktiver de du vil selv</span></h2>
+<div class=offers>
+{% if r.ok %}{% for o in r.offers %}<div class=offer>
+  {% if o.img %}<img src="{{o.img}}" loading=lazy onerror="this.style.display='none'">{% endif %}
+  <div class=b><span class="badge rema">Rema</span><div class=t>{{ o.desc }}</div>
+   {% if o.activated %}<span class=done>✓ Aktivert</span>
+   {% else %}<form method=post action="/rema/offer/{{o.code}}/activate" style=margin:0><button class=btn>Aktiver</button></form>{% endif %}
+  </div></div>{% endfor %}{% endif %}
+{% if t.ok %}{% for o in t.offers %}<div class=offer><div class=b><span class="badge trumf">Trumf</span>
+  <div class=t><b>{{ o.title }}</b><br><span class=mut style=font-size:13px>{{ o.desc }}</span></div></div></div>{% endfor %}{% endif %}
+</div>
+
+<h2>Kvitteringer</h2>
+{% if t.ok and t.receipts %}<details open><summary>Trumf <span class=pill>{{ t.receipts|length }}</span></summary><div class=inner>
 <table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Bonus</th><th>Last ned</th></tr>
 {% for x in t.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
-<td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td>
-<td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">pdf</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
-</table>{% endif %}
-{% if r.ok %}<h2>Rema-kvitteringer</h2>
+<td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td><td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">pdf</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
+</table></div></details>{% endif %}
+{% if r.ok %}<details><summary>Rema 1000 <span class=pill>{{ r.receipts|length }}</span></summary><div class=inner>
 <table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Rabatt</th><th>Last ned</th></tr>
 {% for x in r.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
 <td class="rt {{ 'pos' if x.discount else 'mut' }}">{{ '%.2f'|format(x.discount or 0) }}</td>
 <td class=dl><a href="/rema/receipt/{{x.id}}.json">json</a><a href="/rema/receipt/{{x.id}}.csv">csv</a><a href="/rema/receipt/{{x.id}}.pdf">pdf</a></td></tr>{% endfor %}
-</table>{% endif %}
-<p class=mut style="margin-top:28px;font-size:12px">Coop: API edge-blokkert (kun innlogging mulig)</p>
+</table></div></details>{% endif %}
+<p class=mut style="margin-top:26px;font-size:12px">Coop: API edge-blokkert (kun innlogging mulig) · data caches 5 min</p>
 </div></body></html>"""
 
 @app.route("/")
 def index():
     return render_template_string(TPL, t=trumf_data(), r=rema_data())
+
+@app.route("/rema/offer/<code>/activate", methods=["POST"])
+def rema_offer_activate(code):
+    rema_activate(code); rema_data.clear()
+    return redirect("/")
 
 @app.route("/trumf/receipt/<bid>.<fmt>")
 def trumf_receipt(bid, fmt):
