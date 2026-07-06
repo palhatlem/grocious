@@ -213,7 +213,7 @@ details .inner{padding:0 8px 8px}.err{color:var(--neg)}.pill{display:inline-bloc
 </div>
 
 <h2>Kvitteringer</h2>
-{% if t.ok and t.receipts %}<details open><summary>Trumf <span class=pill>{{ t.receipts|length }}</span></summary><div class=inner>
+{% if t.ok and t.receipts %}<details><summary>Trumf <span class=pill>{{ t.receipts|length }}</span></summary><div class=inner>
 <table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Bonus</th><th>Last ned</th></tr>
 {% for x in t.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
 <td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td><td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">pdf</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
