@@ -34,8 +34,8 @@ change without notice; monitor the fetch job.
 ## Roadmap
 - [x] **Trumf** — bonus balance, receipts, offers
 - [x] **Rema 1000 (Æ)** — offers + receipts (activation available but opt-in, not automatic)
-- [ ] **Coop** — Auth0 login; receipts, coupons/offers (in progress)
-- [ ] **Web GUI** at `grocery.<domain>` — dashboard + one-click receipt export (PDF / JPG / JSON / CSV)
+- [ ] **Coop** — login works, but data API is edge/WAF-walled (see notes) — receipts not reachable
+- [x] **Web GUI** at `grocious.bauneveien.no` — dashboard, offers browser (manual activate), receipt export (JSON/CSV/PDF)
 - [ ] Scheduled fetch/activate + ntfy summary
 
 ## Credits
@@ -44,4 +44,5 @@ and [HelgeSverre's gist](https://gist.github.com/HelgeSverre/80a7f34f87433632418
 Trumf transaction fields from [ttyridal/trumf-data-fetch](https://github.com/ttyridal/trumf-data-fetch).
 
 ## License
-MIT
+
+[AGPL-3.0](LICENSE) — you may use, self-host and modify this, but derivatives (including hosted services) must stay open under AGPL. No taking it private to monetize grocery data.
