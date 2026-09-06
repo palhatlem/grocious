@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""grocious.bauneveien.no — self-hosted grocery dashboard (Trumf + Rema).
+"""grocious.example.com — self-hosted grocery dashboard (Trumf + Rema).
 Bonus, offers/coupons (with manual activate), receipts + JSON/CSV/PDF export.
 Read-only except opt-in Rema offer activation. Behind tinyauth; binds 127.0.0.1."""
 import json, os, io, csv, re, uuid, datetime, functools

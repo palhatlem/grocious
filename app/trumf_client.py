@@ -6,7 +6,7 @@ import json, os, sys, datetime, urllib.request, urllib.parse
 import requests
 
 STATE = os.environ.get("TRUMF_STATE", "/data/trumf_state.json")
-NTFY  = os.environ.get("NTFY_URL")           # e.g. https://ntfy.bauneveien.no/alfreds-... (optional)
+NTFY  = os.environ.get("NTFY_URL")           # e.g. https://ntfy.sh/<topic> (optional)
 API   = "https://platform-rest-prod.ngdata.no"
 
 def load_session():

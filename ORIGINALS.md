@@ -1,6 +1,6 @@
 # Kvitteringsoriginaler — 2026-09-06
 
-Privat arkiv: `/srv/docker/grocery/data/receipts/{coop,trumf,rema}`. SHA-256-navngitte originalfiler overskrives aldri; receipt.json og index.json skrives atomisk. Ukjente kildefelter bevares. Passord og autentiseringsheadere arkiveres ikke sammen med kvitteringene.
+Privat arkiv: `${GROCIOUS_HOME}/data/receipts/{coop,trumf,rema}`. SHA-256-navngitte originalfiler overskrives aldri; receipt.json og index.json skrives atomisk. Ukjente kildefelter bevares. Passord og autentiseringsheadere arkiveres ikke sammen med kvitteringene.
 
 ## Verifiserte kilder
 
@@ -22,6 +22,6 @@ Trumfs direkte detaljside trenger `transactionType`, `timestamp` og `description
 
 Systemd-brukertimer `grocious-provider-archive.timer` kjører daglig ca. 07:15–07:30 Europe/Oslo, via `app/sync_provider_archives.sh`. Gjenbruker grocery-web/grocery-login og eksisterende innlogging, ingen nye lyttere. Feilstatus ligger per kilde i status.json og images_status.json; journalen viser jobbutfall. En kildefeil stopper ikke forsøk på den andre kilden. Ingen automatisk ekstern melding er lagt til.
 
-Originalene er under eksisterende restic-dekning for `/srv/docker`. En ny ekstern backup/restore er ikke verifisert som del av denne oppgaven. Restore til separat mappe og kontroller SHA-256 mot receipt.json før bruk; indeks kan gjenoppbygges med receipt_archive.rebuild(source).
+Ta backup av `${GROCIOUS_HOME}/data/receipts` med ønsket backupverktøy, og test gjenoppretting. Restore til separat mappe og kontroller SHA-256 mot receipt.json før bruk; indeks kan gjenoppbygges med receipt_archive.rebuild(source).
 
-Marcus sine tidligere manuelle filer og eksisterende Trumf/Rema-liveflyt er beholdt. Tidligere endringer i login/rema_login.py er ikke berørt.
+Tidligere manuelt importerte filer og eksisterende Trumf/Rema-liveflyt er beholdt. Tidligere endringer i login/rema_login.py er ikke berørt.

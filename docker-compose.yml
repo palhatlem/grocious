@@ -1,14 +1,14 @@
 # grocery — self-hosted Norwegian grocery bonus tooling.
-# Secrets + tokens live OUTSIDE this repo at /srv/docker/grocery/ (.env + data/).
+# Set GROCIOUS_HOME in the local .env to select the private runtime directory.
 services:
   trumf-fetch:
     build: .
     image: grocery-fetch:latest
     container_name: grocery-trumf-fetch
     command: ["trumf_client.py"]
-    env_file: /srv/docker/grocery/.env
+    env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [TRUMF_STATE=/data/trumf_state.json, TZ=Europe/Oslo]
-    volumes: [/srv/docker/grocery/data:/data]
+    volumes: ["${GROCIOUS_HOME:-.}/data:/data"]
     restart: "no"
 
   rema-fetch:
@@ -16,18 +16,18 @@ services:
     image: grocery-fetch:latest
     container_name: grocery-rema-fetch
     command: ["rema_client.py"]        # fetches + AUTO-ACTIVATES all available offers
-    env_file: /srv/docker/grocery/.env
+    env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [REMA_DATA=/data, TZ=Europe/Oslo]
-    volumes: [/srv/docker/grocery/data:/data]
+    volumes: ["${GROCIOUS_HOME:-.}/data:/data"]
     restart: "no"
 
   web:
     build: {context: ., dockerfile: Dockerfile.web}
     image: grocery-web:latest
     container_name: grocery-web
-    env_file: /srv/docker/grocery/.env
+    env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [GROCERY_DATA=/data, TZ=Europe/Oslo]
-    volumes: [/srv/docker/grocery/data:/data]
+    volumes: ["${GROCIOUS_HOME:-.}/data:/data"]
     ports: ["127.0.0.1:3012:3012"]
     restart: unless-stopped
 
@@ -37,15 +37,15 @@ services:
     image: grocery-login:latest
     command: ["trumf_login.py"]
     profiles: ["login"]
-    env_file: /srv/docker/grocery/.env
+    env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [PLAYWRIGHT_BROWSERS_PATH=/ms-playwright]
-    volumes: [/srv/docker/grocery:/work, /srv/docker/grocery/data:/data]
+    volumes: ["${GROCIOUS_HOME:-.}:/work", "${GROCIOUS_HOME:-.}/data:/data"]
 
   rema-login:
     build: ./login
     image: grocery-login:latest
     command: ["rema_login.py"]
     profiles: ["login"]
-    env_file: /srv/docker/grocery/.env
+    env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [PLAYWRIGHT_BROWSERS_PATH=/ms-playwright]
-    volumes: [/srv/docker/grocery:/work, /srv/docker/grocery/data:/data]
+    volumes: ["${GROCIOUS_HOME:-.}:/work", "${GROCIOUS_HOME:-.}/data:/data"]

@@ -22,6 +22,11 @@ cp .env.example .env      # add TRUMF_PHONE + TRUMF_PASSWORD (kept out of git)
 docker compose --profile login run --rm trumf-login   # first login; paste SMS code when prompted
 docker compose run --rm trumf-fetch                    # pull data; schedule weekly (systemd timer / cron)
 ```
+By default, Compose uses `.env` and `data/` in the project directory. Set
+`GROCIOUS_HOME=/path/to/private/runtime` in the local `.env` to keep runtime files
+elsewhere; that directory must contain its own `.env` and `data/`. Export the same
+variable when running `app/sync_provider_archives.sh` outside Compose.
+
 Session cookie is long-lived (~months, auto-refreshed server-side); re-run the login only when
 `trumf_client` reports the cookie expired.
 
@@ -60,7 +65,7 @@ change without notice; monitor the fetch job.
 - [x] **Trumf** — bonus balance, receipts, offers
 - [x] **Rema 1000 (Æ)** — offers + receipts (activation available but opt-in, not automatic)
 - [ ] **Coop** — login works, but data API is edge/WAF-walled (see notes) — receipts not reachable
-- [x] **Web GUI** at `grocious.bauneveien.no` — dashboard, offers browser (manual activate), receipt export (JSON/CSV/PDF)
+- [x] **Web GUI** at `grocious.example.com` — dashboard, offers browser (manual activate), receipt export (JSON/CSV/PDF)
 - [ ] Scheduled fetch/activate + ntfy summary
 
 ## Credits

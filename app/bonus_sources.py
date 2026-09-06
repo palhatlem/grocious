@@ -61,5 +61,5 @@ def account_observation(source):
         record=json.loads(path.read_text())
         return {'account_balance':record['balance'],'account_available':record['available'],
             'account_basis':'user_reported','account_observed_at':record['observed_at'],
-            'account_note':'Oppgitt av Pål etter BankID-innlogging. Ikke automatisk oppdatert. Differansen mellom saldo og disponibelt er ikke klassifisert som bonus eller depositum.'}
+            'account_note':'Oppgitt av brukeren etter BankID-innlogging. Ikke automatisk oppdatert. Differansen mellom saldo og disponibelt er ikke klassifisert som bonus eller depositum.'}
     except (OSError,ValueError,KeyError):return {}
