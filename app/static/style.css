@@ -1,3 +1,4 @@
+@font-face { font-family: "Space Grotesk"; src: url("/static/fonts/SpaceGrotesk.woff2") format("woff2"); font-weight: 300 700; font-style: normal; font-display: swap; }
 /* grocious — theme variables come from /themes.css (app/themes/*.json). Mobile first. */
 * { box-sizing: border-box; }
 html { background: var(--bg); }
@@ -9,8 +10,8 @@ a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: un
 /* header */
 .top { display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; padding: 10px 14px; background: var(--card);
   border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
-.brand { color: var(--fg); font-weight: 700; font-size: 1.15rem; letter-spacing: -.3px; }
-.brand .cart { filter: drop-shadow(0 1px 3px var(--shadow)); }
+.brand { color: var(--fg); font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 2rem; line-height: 1.15; letter-spacing: -.085em; padding: 3px 0 6px; }
+.brand:hover { text-decoration: none; color: var(--accent); }
 .tagline { color: var(--mut); font-size: .85rem; }
 .meta { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .chip.demo { background: var(--warn); color: #111; font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 4px; letter-spacing: .05em; }

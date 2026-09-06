@@ -1,4 +1,6 @@
-# grocery — self-hosted Norwegian grocery bonus tooling
+# grocious
+
+Your groceries. Your receipts. Your overview.
 
 Pull your loyalty **bonus balance, receipts and campaign offers** straight from the
 grocery APIs — no phone app required. Built because the Trumf/Coop/Rema apps are a
@@ -76,3 +78,6 @@ Trumf transaction fields from [ttyridal/trumf-data-fetch](https://github.com/tty
 ## License
 
 [AGPL-3.0](LICENSE) — you may use, self-host and modify this, but derivatives (including hosted services) must stay open under AGPL. No taking it private to monetize grocery data.
+
+The wordmark uses locally hosted [Space Grotesk](https://github.com/floriankarsten/space-grotesk),
+licensed under the SIL Open Font License (included in `app/static/fonts/`).
