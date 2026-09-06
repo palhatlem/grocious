@@ -5,7 +5,7 @@ grocery APIs — no phone app required. Built because the Trumf/Coop/Rema apps a
 pain (or impossible) on de-Googled Android (GrapheneOS). Runs as small containers.
 
 Implements **Trumf / NorgesGruppen** (Kiwi, Meny, Spar, Joker) and **Rema 1000 (Æ)** —
-tracking bonus, receipts and offers (coupons are **not** auto-activated � by choice). Coop is planned.
+tracking bonus, receipts and offers (coupons are **not** auto-activated — by choice). Coop is planned.
 
 ## How it works
 - `login/` — one-time (or ~yearly) **Playwright** re-auth: drives trumf.no's NextAuth →
@@ -24,6 +24,31 @@ docker compose run --rm trumf-fetch                    # pull data; schedule wee
 ```
 Session cookie is long-lived (~months, auto-refreshed server-side); re-run the login only when
 `trumf_client` reports the cookie expired.
+
+## Web GUI (`app/webgui.py` + `templates/`, `static/`, `themes/`)
+
+Flask, no CDN, no JS framework. `webgui.py` keeps the data functions and every route; the
+presentation lives in `app/templates/` (Jinja), `app/static/style.css` + `app.js`, helpers in `app/ui.py`
+(NOK formatting `1 234,50 kr`, dates `dd.mm.yyyy`). Mobile first; receipts expand in place (line items are
+fetched from the existing `/…/receipt/<id>.json` routes) and can be filtered per chain and month.
+
+**Themes:** one JSON file per theme in `app/themes/` — `light`, `dark`, `gruvbox`, `catppuccin-mocha`, `ink`
+ship. Add a theme by dropping in another file (`{"label": "…", "scheme": "light|dark", "colors": {...}}`,
+keys in `themes.COLOR_KEYS`, missing keys fall back to the base scheme) and restarting; it appears in the
+picker. The picker (header) remembers the choice in `localStorage`; «Auto» follows `prefers-color-scheme`.
+`?theme=<id>` in the URL selects one (used for screenshots).
+
+**Demo mode:** `GROCIOUS_DEMO=1` serves anonymised fixtures (`app/fixtures/`, regenerate with
+`python scripts/gen_fixtures.py`) for Trumf, Rema and a small Coop archive — no tokens, no network:
+
+```
+python -m venv .venv && .venv/bin/pip install flask requests reportlab waitress pytest ruff
+cd app && GROCIOUS_DEMO=1 PORT=3012 ../.venv/bin/python webgui.py
+.venv/bin/pytest && .venv/bin/ruff check .
+```
+
+Receipt line items are cached on disk under `GROCERY_DATA/cache/<chain>-<id>.json` after the first fetch
+(lines never change), so `/api/export/<ym>.json?lines=1` is fast the second time.
 
 ## Security
 Your own loyalty account, personal use. Secrets (`.env`) and the session cookie (`data/`) are
