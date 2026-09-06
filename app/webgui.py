@@ -4,7 +4,8 @@ Bonus, offers/coupons (with manual activate), receipts + JSON/CSV/PDF export.
 Read-only except opt-in Rema offer activation. Behind tinyauth; binds 127.0.0.1."""
 import json, os, io, csv, re, uuid, datetime, functools
 import requests
-from flask import Flask, Response, render_template_string, redirect, abort, request, jsonify
+from flask import Flask, Response, render_template_string, redirect, abort, request, jsonify, send_file
+import receipt_archive
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
@@ -198,6 +199,12 @@ details .inner{padding:0 8px 8px}.err{color:var(--neg)}.pill{display:inline-bloc
    <div class=row><span class=mut>Kvitteringer</span><span>{{ r.count }}</span></div>
    <div class=row><span class=mut>Tilbud</span><span>{{ r.offers|length }}</span></div>
   {% else %}<div class=err>{{ r.err }}</div>{% endif %}</div>
+ <div class="stat" style="border-top:3px solid #46b5d1"><div class=name>Coop</div>
+  <div class=big>{{ c.count }} kvitteringer</div>
+  <div class=row><span class=mut>Original-PDF-er</span><span>{{ c.status.get('original_pdf_count', c.count) }}</span></div>
+  <div class=row><span class=mut>Arkiv</span><span>{{ c.status.get('state', 'not_started') }}</span></div>
+  {% if c.status.get('oldest_date') %}<div class=mut>{{c.status.oldest_date}} – {{c.status.newest_date}}</div>{% endif %}
+ </div>
 </div>
 
 <h2>Tilbud &amp; kuponger <span class=pill>aktiver de du vil selv</span></h2>
@@ -213,23 +220,32 @@ details .inner{padding:0 8px 8px}.err{color:var(--neg)}.pill{display:inline-bloc
 </div>
 
 <h2>Kvitteringer</h2>
+<p><a href="/archive/trumf">Trumf-arkiv: originalbilder og rådata</a> · <a href="/archive/rema">Rema-arkiv: komplette rådata</a></p>
 {% if t.ok and t.receipts %}<details><summary>Trumf <span class=pill>{{ t.receipts|length }}</span></summary><div class=inner>
 <table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Bonus</th><th>Last ned</th></tr>
 {% for x in t.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
-<td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td><td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">pdf</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
+<td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td><td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">laget PDF</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
 </table></div></details>{% endif %}
 {% if r.ok %}<details><summary>Rema 1000 <span class=pill>{{ r.receipts|length }}</span></summary><div class=inner>
 <table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Rabatt</th><th>Last ned</th></tr>
 {% for x in r.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
 <td class="rt {{ 'pos' if x.discount else 'mut' }}">{{ '%.2f'|format(x.discount or 0) }}</td>
-<td class=dl><a href="/rema/receipt/{{x.id}}.json">json</a><a href="/rema/receipt/{{x.id}}.csv">csv</a><a href="/rema/receipt/{{x.id}}.pdf">pdf</a></td></tr>{% endfor %}
+<td class=dl><a href="/rema/receipt/{{x.id}}.json">json</a><a href="/rema/receipt/{{x.id}}.csv">csv</a><a href="/rema/receipt/{{x.id}}.pdf">laget PDF</a></td></tr>{% endfor %}
 </table></div></details>{% endif %}
-<p class=mut style="margin-top:26px;font-size:12px">Coop: API edge-blokkert (kun innlogging mulig) · data caches 5 min</p>
+{% if c.ok %}<details><summary>Coop <span class=pill>{{c.count}}</span></summary><div class=inner>
+<p class=mut>Originale Coop-PDF-er og komplette kildedata er bevart i arkivet.</p>
+{% if c.status.get('errors') %}<p class=err>{{c.status.errors|length}} importavvik – se <a href="/api/coop/status">status</a>.</p>{% endif %}
+<table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th>Kvittering</th></tr>
+{% for x in c.receipts %}<tr><td>{{x.date}} {{x.time or ''}}</td><td>{{x.store}}</td><td class=rt>{{'%.2f'|format(x.amount or 0)}}</td>
+<td class=dl><a href="/coop/receipt/{{x.archive_id}}">Detaljer</a><a href="/coop/receipt/{{x.archive_id}}.pdf">Original PDF</a><a href="/coop/receipt/{{x.archive_id}}.json">JSON</a><a href="/coop/receipt/{{x.archive_id}}.csv">CSV</a>
+{% if x.validation.issues %}<span class=mut>Kontrollavvik</span>{% endif %}</td></tr>{% endfor %}</table>
+</div></details>{% endif %}
+<p class=mut style="margin-top:26px;font-size:12px">Live oversikter caches 5 min · Kvitteringsarkiv lagres lokalt · <a href="/api/coop/status">importstatus</a></p>
 </div></body></html>"""
 
 @app.route("/")
 def index():
-    return render_template_string(TPL, t=trumf_data(), r=rema_data())
+    return render_template_string(TPL, t=trumf_data(), r=rema_data(), c=receipt_archive.summary('coop'))
 
 @app.route("/rema/offer/<code>/activate", methods=["POST"])
 def rema_offer_activate(code):
@@ -247,7 +263,44 @@ def rema_receipt(tid, fmt):
 # ---------------- machine API (agents / bookkeeping) ----------------
 @app.route("/api/summary")
 def api_summary():
-    return jsonify({"trumf": trumf_data(), "rema": rema_data()})
+    return jsonify({"trumf": trumf_data(), "rema": rema_data(), "coop": receipt_archive.summary('coop')})
+
+@app.route('/api/coop/status')
+def coop_status():
+    return jsonify(receipt_archive.summary('coop')['status'])
+
+def coop_record(rid):
+    try: return receipt_archive.read_receipt('coop', rid)
+    except (ValueError, FileNotFoundError): abort(404)
+
+@app.route('/coop/receipt/<rid>')
+def coop_detail(rid):
+    r=coop_record(rid)
+    return render_template_string('''<!doctype html><html lang=nb><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1"><title>Coop-kvittering</title>
+<style>body{background:#0f1116;color:#eceef2;font:15px/1.6 system-ui;max-width:1000px;margin:24px auto;padding:16px}a{color:#72cce1}table{border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #333}pre{white-space:pre-wrap}details{margin:20px 0}.mut{color:#aaa}</style>
+<a href="/">← Grocious</a><h1>{{r.store}}</h1><p>{{r.date}} {{r.time or ''}} · {{'%.2f'|format(r.amount or 0)}} NOK</p>
+<p><a href="{{r.archive_id}}.pdf">Original PDF</a> · <a href="{{r.archive_id}}.json">Komplett JSON</a> · <a href="{{r.archive_id}}.csv">Varelinjer CSV</a></p>
+<table><tr><th>Vare</th><th>Antall/enhet oppgitt av Coop</th><th>Beløp</th><th>Rabatt</th></tr>
+{% for l in r.lines %}<tr><td>{{l.name}}</td><td>{{l.quantity_text or '—'}}</td><td>{{l.amount if l.amount is not none else '—'}}</td><td>{{l.discount if l.discount is not none else '—'}}</td></tr>{% endfor %}</table>
+{% if r.tax %}<h2>MVA</h2><table><tr><th>Del</th><th>Grunnlag</th><th>Sats</th><th>MVA</th><th>Sum</th></tr>{% for t in r.tax %}<tr><td>{{'Kjøp' if t.section=='purchase' else 'Medlemsfordel'}}</td><td>{{'%.2f'|format(t.base_minor/100)}}</td><td>{{t.rate}}%</td><td>{{'%.2f'|format(t.tax_minor/100)}}</td><td>{{'%.2f'|format(t.total_minor/100)}}</td></tr>{% endfor %}</table>{% endif %}
+<h2>Medlemsfordeler</h2>{% for name,value in benefits %}{% if value is not none %}<div>{{name}}: {{value}}</div>{% endif %}{% endfor %}
+<details><summary>Hele originalteksten, inkludert betaling og referanser</summary><pre>{{r.document_text}}</pre></details>
+{% if r.validation.issues %}<p>Kontrollavvik: {{r.validation.issues|join(', ')}}. Originalen og alle kildedata er bevart.</p>{% endif %}
+<p class=mut>Arkivert {{r.archived_at}}. Ukjent antall eller rabatt vises som «—».</p></html>''', r=r,
+      benefits=[(label,r['benefits'].get(k)) for k,label in [('purchaseReturn','Kjøpeutbytte'),('memberDiscount','Medlemsrabatt'),('couponDiscount','Kupongrabatt'),('coopMastercard','Coop Mastercard'),('totalMemberBenefit','Oppgitt medlemsfordel')]])
+
+@app.route('/coop/receipt/<rid>.<fmt>')
+def coop_download(rid,fmt):
+    r=coop_record(rid)
+    if fmt=='json':return Response(json.dumps(r,ensure_ascii=False,indent=2),mimetype='application/json',headers={'Content-Disposition':f'attachment;filename=coop-{r["archive_id"]}.json'})
+    if fmt=='csv':return Response(receipt_archive.receipt_csv(r),mimetype='text/csv',headers={'Content-Disposition':f'attachment;filename=coop-{r["archive_id"]}.csv'})
+    if fmt=='pdf':
+        doc=next((d for d in r['documents'] if d['role']=='original' and d['mimetype']=='application/pdf'),None)
+        if not doc:abort(404)
+        path,_=receipt_archive.document('coop',rid,doc['filename'])
+        return send_file(path,mimetype='application/pdf',as_attachment=True,download_name=f'coop-{r["receipt_id"]}.pdf')
+    abort(404)
 
 def _month_receipts(ym, with_lines=False):
     out = []
@@ -268,6 +321,15 @@ def _month_receipts(ym, with_lines=False):
                 if with_lines:
                     rec["lines"] = rema_lines(int(x["id"]))
                 out.append(rec)
+    for x in receipt_archive.summary('coop')['receipts']:
+        if (x.get('date') or '').startswith(ym):
+            rec={"chain":"coop","id":x['id'],"date":x['date'],"store":x['store'],"amount":x['amount'],"bonus":x.get('bonus') or 0,"discount":0,"archive_id":x['archive_id']}
+            if with_lines:
+                full=receipt_archive.read_receipt('coop',x['archive_id'])
+                rec.update(full)
+                # Existing combined totals require numbers; the source value stays explicit.
+                rec['bonus']=full.get('bonus') or 0;rec['discount']=full.get('discount') or 0
+            out.append(rec)
     out.sort(key=lambda x: x["date"])
     return out
 
@@ -298,3 +360,59 @@ def api_export(ym, fmt):
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "3012")))
+
+
+# Independent archive routes preserve existing download contracts.
+def archived_record(source,rid):
+    try:return receipt_archive.read_receipt(source,rid)
+    except (ValueError,FileNotFoundError):abort(404)
+
+@app.route('/api/archive/<source>')
+def archived_summary(source):
+    try:return jsonify(receipt_archive.summary(source))
+    except ValueError:abort(404)
+
+@app.route('/archive/<source>')
+def archived_list(source):
+    try:data=receipt_archive.summary(source)
+    except ValueError:abort(404)
+    return render_template_string(ARCHIVE_STYLE+'''<a href="/">← Grocious</a><h1>{{provider|capitalize}} – kvitteringsarkiv</h1>
+<p>Komplette kildedata bevares. Nedlastede leverandørbilder vises der de finnes; en «laget PDF» i den gamle eksporten er en Grocious-visning.</p>
+<p>{{data.count}} arkiverte kjøp · {{data.status.get('state')}} · <a href="/api/archive/{{provider}}">Status/indeks JSON</a></p>
+{% if data.get('image_status') %}<p>Leverandørbilder: {{data.image_status.get('already_archived',0)+data.image_status.get('downloaded',0)}} / {{data.image_status.expected}} · {{data.image_status.state}}{% if data.image_status.errors %} · {{data.image_status.errors|length}} hente-feil{% endif %}</p>{% endif %}
+<table><tr><th>Dato</th><th>Butikk</th><th>Beløp</th><th>Arkiv</th></tr>{% for r in data.receipts %}<tr><td>{{r.date}}</td><td>{{r.store}}</td><td>{{r.amount}}</td><td><a href="/archive/{{provider}}/{{r.archive_id}}">Alle detaljer og originalfiler</a></td></tr>{% endfor %}</table>''',provider=source,data=data)
+
+ARCHIVE_STYLE='''<!doctype html><html lang=nb><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Grocious kvitteringsarkiv</title><style>body{background:#0f1116;color:#eceef2;font:15px/1.6 system-ui;max-width:1000px;margin:24px auto;padding:16px}a{color:#72cce1}table{border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #333}pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%}</style>'''
+
+@app.route('/archive/<source>/<rid>')
+def archived_detail(source,rid):
+    r=archived_record(source,rid)
+    return render_template_string(ARCHIVE_STYLE+'''<a href="/archive/{{provider}}">← Arkiv</a><h1>{{r.store}}</h1><p>{{r.date}} {{r.time or ''}} · {{r.amount}} NOK</p>
+<p><a href="/archive/{{provider}}/{{r.archive_id}}.json">Komplett JSON</a> · <a href="/archive/{{provider}}/{{r.archive_id}}.zip">Alle arkivfiler ZIP</a></p>
+{% if r.original_status=='raw_data_only' %}<p>Komplette originale API-data er arkivert. Et eget kvitteringsbilde er ikke funnet i de undersøkte kallene.</p>{% elif r.original_status=='image_not_retrieved' %}<p>Rådata er arkivert. Leverandørbilde er ikke hentet ennå.</p>{% elif r.original_status=='not_offered' %}<p>Kilden oppgir at dette kjøpet ikke har egen kvittering. Kjøpsopplysningene er bevart.</p>{% endif %}
+<h2>Originalfiler</h2><ul>{% for d in r.documents %}<li><a href="/archive/{{provider}}/{{r.archive_id}}/file/{{d.filename}}">{{'Leverandørens kvitteringsbilde' if d.mimetype.startswith('image/') else d.role}} ({{d.mimetype}})</a></li>{% endfor %}</ul>
+{% for d in r.documents %}{% if d.mimetype.startswith('image/') %}<img loading=lazy alt="Leverandørens kvitteringsbilde" src="/archive/{{provider}}/{{r.archive_id}}/file/{{d.filename}}">{% endif %}{% endfor %}
+<h2>Varelinjer</h2><table><tr><th>Vare</th><th>Antall</th><th>Enhet</th><th>Beløp</th></tr>{% for l in r.lines %}<tr><td>{{l.name}}</td><td>{{l.qty if l.qty is not none else '—'}}</td><td>{{l.unit or '—'}}</td><td>{{l.amount if l.amount is not none else '—'}}</td></tr>{% endfor %}</table>
+<details><summary>Alle kildefelter, inkludert betaling, pant, MVA og bonus der oppgitt</summary><pre>{{raw}}</pre></details>
+{% if r.validation.issues %}<p>Kontrollavvik: {{r.validation.issues|join(', ')}}</p>{% endif %}<p>Arkivert {{r.archived_at}}. Dokumenter kontrolleres mot SHA-256 ved nedlasting.</p>''',r=r,provider=source,raw=json.dumps(r['source'],ensure_ascii=False,indent=2))
+
+@app.route('/archive/<source>/<rid>.<fmt>')
+def archived_download(source,rid,fmt):
+    r=archived_record(source,rid)
+    if fmt=='json':return Response(json.dumps(r,ensure_ascii=False,indent=2),mimetype='application/json',headers={'Content-Disposition':f'attachment;filename={source}-{rid}.json'})
+    if fmt=='zip':
+        import zipfile
+        buf=io.BytesIO()
+        with zipfile.ZipFile(buf,'w',compression=zipfile.ZIP_DEFLATED) as z:
+            z.writestr('receipt.json',json.dumps(r,ensure_ascii=False,indent=2))
+            for d in r['documents']:
+                path,_=receipt_archive.document(source,rid,d['filename']);z.write(path,d['filename'])
+        buf.seek(0);return send_file(buf,mimetype='application/zip',as_attachment=True,download_name=f'{source}-{rid}.zip')
+    abort(404)
+
+@app.route('/archive/<source>/<rid>/file/<filename>')
+def archived_file(source,rid,filename):
+    archived_record(source,rid)
+    try:path,doc=receipt_archive.document(source,rid,filename)
+    except (ValueError,FileNotFoundError):abort(404)
+    return send_file(path,mimetype=doc['mimetype'],as_attachment=not doc['mimetype'].startswith('image/'),download_name=filename)
