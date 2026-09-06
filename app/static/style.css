@@ -109,3 +109,20 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
   .receipt .extra { min-width: 90px; }
   .receipt .date { font-size: .9rem; }
 }
+
+/* Offers start collapsed, matching receipt disclosure arrows. */
+.offers-panel > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; list-style: none; }
+.offers-panel > summary::-webkit-details-marker { display: none; }
+.offers-panel > summary h2 { margin: 0; }
+.offers-panel > summary .caret { color: var(--mut); transition: transform .15s; }
+.offers-panel[open] > summary { margin-bottom: 10px; }
+.offers-panel[open] > summary .caret { transform: rotate(90deg); }
+
+.stats { align-items: start; }
+.stat-more { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+.stat-more > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; color: var(--mut); font-size: .85rem; }
+.stat-more > summary::-webkit-details-marker { display: none; }
+.stat-more .caret { transition: transform .15s; }
+.stat-more[open] > summary .caret { transform: rotate(90deg); }
+
+.metric-note { display: block; color: var(--mut); font-size: .7rem; font-weight: normal; white-space: normal; }

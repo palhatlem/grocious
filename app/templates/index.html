@@ -1,42 +1,43 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="stats">
-  <div class="stat trumf">
-    <div class="label"><span class="dot"></span>Trumf</div>
-    {% if t.ok %}
-    <div class="value pos" data-num>{{ t.saldo|nok(2) }}</div>
-    <div class="sub">bonus å bruke · oppdatert {{ t.oppdatert|day }}</div>
+  {% for stat in stats %}
+  <div class="stat {{ stat.source }}">
+    <div class="label"><span class="dot"></span>{{ stat.name }}</div>
+    <div class="value" data-num>{{ stat.spent_year|nok(2) }}</div>
+    <div class="sub">Brukt i {{ stat.year }}</div>
     <dl class="kv">
-      <dt>Akkumulert</dt><dd data-num>{{ t.akkumulert|nok }}</dd>
-      <dt>Kvitteringer</dt><dd>{{ t.count }}</dd>
-      <dt>Kampanjer</dt><dd>{{ t.offers|length }}</dd>
+      <dt>Opptjent bonus i {{ stat.year }}</dt><dd class="pos"><span data-num>{{ stat.bonus_year|nok(2) if stat.bonus_year is not none else 'Ikke tilgjengelig' }}</span>{% if stat.bonus_year_basis == 'receipts' %}<small class="metric-note">Beregnet fra kvitteringer</small>{% elif stat.bonus_year_basis %}<small class="metric-note">{{ 'Sum av kjedens medlemstall' if stat.bonus_year_basis == 'provider_sum' else 'Oppgitt av kjeden' }}{% if stat.bonus_stale %} · sist hentet{% endif %}</small>{% endif %}</dd>
+      <dt>Kvitteringer</dt><dd>{{ stat.count if stat.count is not none else '—' }}</dd>
     </dl>
-    {% else %}<div class="err">Trumf: {{ t.err }}</div>{% endif %}
+    <details class="stat-more">
+      <summary>Mer informasjon <span class="caret" aria-hidden="true">▸</span></summary>
+      <dl class="kv">
+        <dt>Brukt i hele historikken</dt><dd data-num>{{ stat.spent_all|nok(2) }}</dd>
+        <dt>Saldo på kundekonto</dt><dd><span data-num>{{ stat.account_balance|nok(2) if stat.account_balance is not none else 'Ikke tilgjengelig' }}</span>{% if stat.account_basis == 'user_reported' %}<small class="metric-note">Oppgitt av deg {{ stat.account_observed_at|day }}</small>{% endif %}</dd>
+        <dt>Disponibelt på kundekonto</dt><dd><span data-num>{{ stat.account_available|nok(2) if stat.account_available is not none else 'Ikke tilgjengelig' }}</span>{% if stat.account_basis == 'user_reported' %}<small class="metric-note">Oppgitt av deg {{ stat.account_observed_at|day }}</small>{% endif %}</dd>
+        <dt>Opptjent bonus totalt</dt><dd data-num>{{ stat.bonus_accumulated|nok(2) if stat.bonus_accumulated is not none else 'Ikke tilgjengelig' }}</dd>
+        <dt>Tilbud og rabatter i {{ stat.year }}</dt><dd><span data-num>{{ stat.discounts_year|nok(2) if stat.discounts_year is not none else 'Ikke tilgjengelig' }}</span>{% if stat.savings_year_basis %}<small class="metric-note">{{ 'Oppgitt av kjeden' if stat.savings_year_basis == 'provider' else 'Beregnet fra kvitteringer' }}{% if stat.source == 'rema' %} · samlet rabatt{% endif %}</small>{% endif %}</dd>
+        <dt>Kuponger i {{ stat.year }}</dt><dd><span data-num>{{ stat.coupons_year|nok(2) if stat.coupons_year is not none else 'Ikke spesifisert' }}</span>{% if stat.coupons_year is not none %}<small class="metric-note">{{ 'Oppgitt av kjeden' if stat.savings_year_basis == 'provider' else 'Beregnet fra kvitteringer' }}</small>{% endif %}</dd>
+        <dt>Kvitteringer i {{ stat.year }}</dt><dd>{{ stat.year_count if stat.year_count is not none else '—' }}</dd>
+        <dt>Historikk fra</dt><dd>{{ stat.first_date|day }}</dd>
+        <dt>Siste kjøp</dt><dd>{{ stat.last_date|day }}</dd>
+      </dl>
+      <p class="mut small">Forbruk og antall er beregnet fra tilgjengelige kjøp. Bonusuttak er ikke medregnet. Kontosaldo og opptjent bonus er forskjellige tall.</p>
+      {% if stat.bonus_year_note %}<p class="mut small">{{ stat.bonus_year_note }}</p>{% endif %}
+      {% if stat.bonus_year_basis == 'receipts' %}<p class="mut small">Årsbonusen er summen av bonusbeløpene på tilgjengelige kvitteringer. Kilden har ikke gitt en bekreftet kalenderårssum; bonus utenfor kvitteringene kan mangle.</p>{% endif %}
+      {% if stat.bonus_accumulated is none %}<p class="mut small">Opptjent bonus gjennom all tid er ikke bekreftet fra kilden.</p>{% endif %}
+      {% if stat.savings_year_note %}<p class="mut small">{{ stat.savings_year_note }}</p>{% endif %}
+      {% if stat.account_note %}<p class="mut small">{{ stat.account_note }}</p>{% endif %}
+      {% if stat.account_balance is none %}<p class="mut small">Oppdatert bonussaldo er ikke tilgjengelig fra denne kilden.</p>{% endif %}
+      {% if stat.error %}<p class="err small">Kunne ikke oppdatere live-data. Arkiverte kjøp vises.</p>{% endif %}
+    </details>
   </div>
-  <div class="stat rema">
-    <div class="label"><span class="dot"></span>Rema 1000</div>
-    {% if r.ok %}
-    <div class="value" data-num>{{ r.purchaseTotal|nok }}</div>
-    <div class="sub">handlet totalt · <span class="pos" data-num>{{ r.discountTotal|nok }}</span> spart</div>
-    <dl class="kv">
-      <dt>Kvitteringer</dt><dd>{{ r.count }}</dd>
-      <dt>Tilbud</dt><dd>{{ r.offers|length }} <span class="mut">({{ r.offers|selectattr('activated')|list|length }} aktivert)</span></dd>
-    </dl>
-    {% else %}<div class="err">Rema: {{ r.err }}</div>{% endif %}
-  </div>
-  <div class="stat coop">
-    <div class="label"><span class="dot"></span>Coop</div>
-    <div class="value">{{ c.count }} <span class="unit">kvitteringer</span></div>
-    <div class="sub">arkiv {{ c.status.get('state', 'not_started') }}{% if c.status.get('oldest_date') %} · {{ c.status.oldest_date|day }} – {{ c.status.newest_date|day }}{% endif %}</div>
-    <dl class="kv">
-      <dt>Original-PDF-er</dt><dd>{{ c.status.get('original_pdf_count', c.count) }}</dd>
-      {% if c.status.get('errors') %}<dt>Importavvik</dt><dd class="neg"><a href="/api/coop/status">{{ c.status.errors|length }}</a></dd>{% endif %}
-    </dl>
-  </div>
+  {% endfor %}
 </section>
 
-<section class="panel">
-  <h2>Tilbud &amp; kuponger <span class="pill">aktiver de du vil selv</span></h2>
+<details class="panel offers-panel">
+  <summary><h2>Tilbud &amp; kuponger <span class="pill">aktiver de du vil selv</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
   <div class="offers">
     {% if r.ok %}{% for o in r.offers %}
     <div class="offer">
@@ -53,7 +54,7 @@
     {% endfor %}{% endif %}
     {% if not (r.ok and r.offers) and not (t.ok and t.offers) %}<p class="mut">Ingen tilbud akkurat nå.</p>{% endif %}
   </div>
-</section>
+</details>
 
 <section class="panel" id="receipts">
   <h2>Kvitteringer</h2>

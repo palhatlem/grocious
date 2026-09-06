@@ -24,7 +24,8 @@ def test_index_survives_failed_sources(client, monkeypatch):
     monkeypatch.setattr(webgui, "trumf_data", lambda: {"ok": False, "err": "cookie expired"})
     monkeypatch.setattr(webgui, "rema_data", lambda: {"ok": False, "err": "401"})
     html = client.get("/").get_data(as_text=True)
-    assert "cookie expired" in html and "401" in html and "Ingen tilbud" in html
+    assert html.count("Kunne ikke oppdatere live-data. Arkiverte kjøp vises.") == 2
+    assert "Ingen tilbud" in html
 
 
 def test_themes_css_and_files(client):

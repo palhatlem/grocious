@@ -6,7 +6,7 @@ import json, os, io, csv, re, uuid, datetime, functools
 import requests
 from flask import Flask, Response, render_template, redirect, abort, request, jsonify, send_file
 import receipt_archive
-import demo, themes, ui
+import demo, themes, ui, dashboard_stats, bonus_sources
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
@@ -98,9 +98,9 @@ def trumf_data():
             seen.add(bid)
             recs.append({"id": bid, "date": (o.get("bonusberegningTidspunkt") or "").replace("$D", "")[:10],
                          "store": o.get("beskrivelse"), "amount": o.get("belop"), "bonus": o.get("bonus"),
-                         "chain": o.get("filterCategory"), "hasReceipt": o.get("harKvittering")})
+                         "chain": o.get("filterCategory"), "hasReceipt": o.get("harKvittering"), "transaction_category": o.get("transaksjonKategori")})
         recs.sort(key=lambda x: x["date"], reverse=True)
-        return {"ok": True, "saldo": saldo.get("trumfSaldo"), "akkumulert": saldo.get("totaltAkkumulertTrumf"),
+        return {"ok": True, "saldo": saldo.get("trumfSaldo"), "akkumulert": saldo.get("totaltAkkumulertTrumf"), "account_balance": saldo.get("bokfortSaldo"), "account_available": saldo.get("trumfSaldo"),
                 "oppdatert": (saldo.get("sistOppdatert") or "")[:10], "count": len(recs), "receipts": recs,
                 "offers": [{"title": o.get("visningsTekst"), "desc": o.get("beskrivelse")}
                            for o in (offers if isinstance(offers, list) else [])]}
@@ -136,13 +136,22 @@ def rema_data():
         H = rema_headers()
         heads = requests.get("https://api.rema.no/v1/bella/transaction/v2/heads", headers=H, timeout=30).json()
         offers = requests.get("https://api.rema.no/v1/bella/offers/v2/available-offers/", headers=H, timeout=20).json()
+        balance = accumulated = None
+        try:
+            profile = requests.get("https://api.rema.no/bella/v2/customers", headers=H, timeout=15)
+            profile.raise_for_status(); profile = profile.json()
+            if profile.get("currencyCode") == "NOK" and not profile.get("member", {}).get("spennUser"):
+                balance = profile.get("member", {}).get("bonusBalanceDecimal")
+                accumulated = profile.get("member", {}).get("accBonusBalanceDecimal")
+        except (requests.RequestException, ValueError, AttributeError):
+            pass
         olist = offers if isinstance(offers, list) else offers.get("offers", [])
         txs = [{"id": t["id"], "date": datetime.datetime.fromtimestamp(t["purchaseDate"]/1000).strftime("%Y-%m-%d %H:%M"),
-                "store": t.get("storeName"), "amount": t.get("amount"), "discount": t.get("discount", 0)}
+                "store": t.get("storeName"), "amount": t.get("amount"), "discount": t.get("discount", 0), "bonus": t.get("bonusPointsDecimal")}
                for t in heads.get("transactions", [])]
         txs.sort(key=lambda x: x["date"], reverse=True)
         return {"ok": True, "purchaseTotal": heads.get("purchaseTotal"), "discountTotal": heads.get("discountTotal"),
-                "count": len(txs), "receipts": txs,
+                "count": len(txs), "receipts": txs, "bonus_balance": balance, "bonus_accumulated": None,
                 "offers": [{"code": o.get("code"), "desc": o.get("desc"), "activated": o.get("activated"),
                             "img": o.get("dutyText") if str(o.get("dutyText", "")).startswith("http") else None} for o in olist]}
     except Exception as e:
@@ -189,10 +198,17 @@ if DEMO:  # anonymised fixtures, no tokens, no network — the real functions ab
     trumf_data, rema_data, trumf_lines, rema_lines, rema_activate = (
         demo.trumf_data, demo.rema_data, demo.trumf_lines, demo.rema_lines, demo.rema_activate)
 
+@_cache(300)
+def coop_bonus():
+    return {} if DEMO else bonus_sources.coop_data()
+
+def coop_dashboard():
+    return {**receipt_archive.summary('coop'), **coop_bonus(), **({} if DEMO else bonus_sources.account_observation('coop'))}
+
 @app.route("/")
 def index():
-    t, r, c = trumf_data(), rema_data(), receipt_archive.summary('coop')
-    return render_template("index.html", t=t, r=r, c=c, demo=DEMO, **ui.context(t, r, c))
+    t, r, c = trumf_data(), rema_data(), coop_dashboard()
+    return render_template("index.html", t=t, r=r, c=c, stats=dashboard_stats.cards(t,r,c), demo=DEMO, **ui.context(t, r, c))
 
 @app.route("/themes.css")
 def themes_css():
@@ -214,7 +230,7 @@ def rema_receipt(tid, fmt):
 # ---------------- machine API (agents / bookkeeping) ----------------
 @app.route("/api/summary")
 def api_summary():
-    return jsonify({"trumf": trumf_data(), "rema": rema_data(), "coop": receipt_archive.summary('coop')})
+    return jsonify({"trumf": trumf_data(), "rema": rema_data(), "coop": coop_dashboard()})
 
 @app.route('/api/coop/status')
 def coop_status():
