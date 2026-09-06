@@ -1,0 +1,275 @@
+{
+ "ok": true,
+ "saldo": 412.37,
+ "akkumulert": 6812.0,
+ "oppdatert": "2026-09-05",
+ "count": 28,
+ "receipts": [
+  {
+   "id": "demo-trumf-028",
+   "date": "2026-07-04",
+   "store": "SPAR Hillevåg",
+   "amount": 304.91,
+   "bonus": 3.05,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-027",
+   "date": "2026-07-01",
+   "store": "MENY Stavanger",
+   "amount": 199.4,
+   "bonus": 1.99,
+   "chain": "Meny",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-026",
+   "date": "2026-06-29",
+   "store": "SPAR Hillevåg",
+   "amount": 446.1,
+   "bonus": 4.46,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-025",
+   "date": "2026-06-28",
+   "store": "JOKER Storhaug",
+   "amount": 169.91,
+   "bonus": 1.7,
+   "chain": "Joker",
+   "hasReceipt": false
+  },
+  {
+   "id": "demo-trumf-024",
+   "date": "2026-06-26",
+   "store": "MENY Stavanger",
+   "amount": 554.5,
+   "bonus": 5.54,
+   "chain": "Meny",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-023",
+   "date": "2026-06-23",
+   "store": "SPAR Hillevåg",
+   "amount": 254.19,
+   "bonus": 2.54,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-022",
+   "date": "2026-06-20",
+   "store": "KIWI 335 Løkkeveien",
+   "amount": 497.18,
+   "bonus": 4.97,
+   "chain": "Kiwi",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-021",
+   "date": "2026-06-18",
+   "store": "JOKER Storhaug",
+   "amount": 293.03,
+   "bonus": 2.93,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-020",
+   "date": "2026-06-16",
+   "store": "JOKER Storhaug",
+   "amount": 220.01,
+   "bonus": 2.2,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-019",
+   "date": "2026-06-15",
+   "store": "MENY Stavanger",
+   "amount": 771.5,
+   "bonus": 7.71,
+   "chain": "Meny",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-018",
+   "date": "2026-06-14",
+   "store": "JOKER Storhaug",
+   "amount": 607.37,
+   "bonus": 6.07,
+   "chain": "Joker",
+   "hasReceipt": false
+  },
+  {
+   "id": "demo-trumf-017",
+   "date": "2026-06-13",
+   "store": "KIWI 335 Løkkeveien",
+   "amount": 192.37,
+   "bonus": 1.92,
+   "chain": "Kiwi",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-016",
+   "date": "2026-06-11",
+   "store": "JOKER Storhaug",
+   "amount": 286.2,
+   "bonus": 2.86,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-015",
+   "date": "2026-06-09",
+   "store": "SPAR Hillevåg",
+   "amount": 414.83,
+   "bonus": 4.15,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-014",
+   "date": "2026-06-07",
+   "store": "MENY Stavanger",
+   "amount": 569.1,
+   "bonus": 5.69,
+   "chain": "Meny",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-013",
+   "date": "2026-06-05",
+   "store": "SPAR Hillevåg",
+   "amount": 455.17,
+   "bonus": 4.55,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-012",
+   "date": "2026-06-04",
+   "store": "JOKER Storhaug",
+   "amount": 381.86,
+   "bonus": 3.82,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-011",
+   "date": "2026-06-03",
+   "store": "JOKER Storhaug",
+   "amount": 120.6,
+   "bonus": 1.21,
+   "chain": "Joker",
+   "hasReceipt": false
+  },
+  {
+   "id": "demo-trumf-010",
+   "date": "2026-05-30",
+   "store": "JOKER Storhaug",
+   "amount": 874.8,
+   "bonus": 8.75,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-009",
+   "date": "2026-05-26",
+   "store": "SPAR Hillevåg",
+   "amount": 824.56,
+   "bonus": 8.25,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-008",
+   "date": "2026-05-24",
+   "store": "KIWI 335 Løkkeveien",
+   "amount": 135.34,
+   "bonus": 1.35,
+   "chain": "Kiwi",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-007",
+   "date": "2026-05-20",
+   "store": "JOKER Storhaug",
+   "amount": 787.9,
+   "bonus": 7.88,
+   "chain": "Joker",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-006",
+   "date": "2026-05-16",
+   "store": "SPAR Hillevåg",
+   "amount": 419.21,
+   "bonus": 4.19,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-005",
+   "date": "2026-05-15",
+   "store": "SPAR Hillevåg",
+   "amount": 111.3,
+   "bonus": 1.11,
+   "chain": "Spar",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-004",
+   "date": "2026-05-14",
+   "store": "JOKER Storhaug",
+   "amount": 358.71,
+   "bonus": 3.59,
+   "chain": "Joker",
+   "hasReceipt": false
+  },
+  {
+   "id": "demo-trumf-003",
+   "date": "2026-05-10",
+   "store": "KIWI 335 Løkkeveien",
+   "amount": 388.52,
+   "bonus": 3.89,
+   "chain": "Kiwi",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-002",
+   "date": "2026-05-07",
+   "store": "MENY Stavanger",
+   "amount": 128.3,
+   "bonus": 1.28,
+   "chain": "Meny",
+   "hasReceipt": true
+  },
+  {
+   "id": "demo-trumf-001",
+   "date": "2026-05-05",
+   "store": "KIWI 335 Løkkeveien",
+   "amount": 606.7,
+   "bonus": 6.07,
+   "chain": "Kiwi",
+   "hasReceipt": true
+  }
+ ],
+ "offers": [
+  {
+   "title": "3 % ekstra Trumf på frukt og grønt",
+   "desc": "Gjelder alle Kiwi-butikker ut september."
+  },
+  {
+   "title": "Dobbel Trumf-bonus torsdag",
+   "desc": "Meny: dobbel bonus på hele kjøpet torsdag 11.09."
+  },
+  {
+   "title": "10 % Trumf på Tine-produkter",
+   "desc": "Spar og Joker, t.o.m. 30.09."
+  }
+ ]
+}

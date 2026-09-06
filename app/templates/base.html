@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}grocious{% endblock %}</title>
+<link rel="stylesheet" href="/themes.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script>/* apply the remembered theme before first paint */
+try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") document.documentElement.setAttribute("data-theme", th); } catch (e) {}
+</script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><span class="cart">🛒</span> grocious</a>
+  <span class="tagline">dagligvarebonus &amp; kvitteringer</span>
+  <div class="meta">
+    {% if demo %}<span class="chip demo" title="GROCIOUS_DEMO=1: anonymiserte fixtures, ingen ekte tokens">DEMO</span>{% endif %}
+    <label class="theme-pick" title="Tema (husk i nettleseren)">
+      <span class="ico" aria-hidden="true">◐</span>
+      <select id="theme" aria-label="Tema">
+        <option value="auto">Auto (system)</option>
+        {% for th in themes %}<option value="{{ th.id }}">{{ th.label }}</option>{% endfor %}
+      </select>
+    </label>
+  </div>
+</header>
+<main class="wrap">
+{% block content %}{% endblock %}
+</main>
+<footer class="foot">
+  <span>Live oversikter caches 5 min · kvitteringsarkiv lagres lokalt</span>
+  <span class="links"><a href="/api/summary">api/summary</a>{% if current_month %} · <a href="/api/export/{{ current_month }}.csv">eksport {{ current_month }}</a>{% endif %}</span>
+</footer>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

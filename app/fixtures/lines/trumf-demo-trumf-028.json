@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-028",
+ "lines": [
+  {
+   "name": "Cottage cheese",
+   "ean": "7099245192948",
+   "qty": 1,
+   "amount": 26.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7089215685710",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7067883505666",
+   "qty": 3,
+   "amount": 179.7
+  }
+ ]
+}

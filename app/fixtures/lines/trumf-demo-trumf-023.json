@@ -1,0 +1,35 @@
+{
+ "id": "demo-trumf-023",
+ "lines": [
+  {
+   "name": "Banan",
+   "ean": "7025180636043",
+   "qty": 3,
+   "amount": 56.19
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7062269285298",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7066666082832",
+   "qty": 3,
+   "amount": 89.7
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7084568278409",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Tomater",
+   "ean": "7031113325233",
+   "qty": 1,
+   "amount": 24.5
+  }
+ ]
+}

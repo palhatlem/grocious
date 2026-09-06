@@ -1,0 +1,29 @@
+{
+ "id": "demo-trumf-020",
+ "lines": [
+  {
+   "name": "Egg 12 pk",
+   "ean": "7035944421124",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Agurk",
+   "ean": "7060439087794",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7061618871202",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7078290407231",
+   "qty": 3,
+   "amount": 98.31
+  }
+ ]
+}

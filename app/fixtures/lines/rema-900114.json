@@ -1,0 +1,47 @@
+{
+ "id": 900114,
+ "lines": [
+  {
+   "name": "Smør 500 g",
+   "ean": "7098787661418",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7042129327213",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7061789112021",
+   "qty": 3,
+   "amount": 239.7
+  },
+  {
+   "name": "Banan",
+   "ean": "7028728111205",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7074565252849",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7049163612161",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Tomater",
+   "ean": "7057067878214",
+   "qty": 1,
+   "amount": 24.5
+  }
+ ]
+}

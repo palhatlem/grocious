@@ -1,0 +1,29 @@
+{
+ "id": 900112,
+ "lines": [
+  {
+   "name": "Banan",
+   "ean": "7054753379689",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7089846884229",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7068518855419",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7086503268327",
+   "qty": 1,
+   "amount": 89.9
+  }
+ ]
+}

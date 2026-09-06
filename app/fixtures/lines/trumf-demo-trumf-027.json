@@ -1,0 +1,29 @@
+{
+ "id": "demo-trumf-027",
+ "lines": [
+  {
+   "name": "Pasta 500 g",
+   "ean": "7068986155349",
+   "qty": 2,
+   "amount": 31.8
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7029155202824",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7078671050348",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7029503304104",
+   "qty": 2,
+   "amount": 97.8
+  }
+ ]
+}

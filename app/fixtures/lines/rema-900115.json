@@ -1,0 +1,53 @@
+{
+ "id": 900115,
+ "lines": [
+  {
+   "name": "Banan",
+   "ean": "7055977239076",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7045039945958",
+   "qty": 2,
+   "amount": 49.8
+  },
+  {
+   "name": "Agurk",
+   "ean": "7076914391158",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7065032087861",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7042661771236",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7051630818695",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7034702144760",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7057269463675",
+   "qty": 3,
+   "amount": 179.7
+  }
+ ]
+}

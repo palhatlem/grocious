@@ -1,0 +1,53 @@
+{
+ "id": 900103,
+ "lines": [
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7066113033834",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7061859745910",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7044836326365",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7057588639114",
+   "qty": 2,
+   "amount": 59.8
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7038084339246",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7083814198235",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7089901817687",
+   "qty": 3,
+   "amount": 74.7
+  },
+  {
+   "name": "Tomater",
+   "ean": "7028403849137",
+   "qty": 1,
+   "amount": 24.5
+  }
+ ]
+}

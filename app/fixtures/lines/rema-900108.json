@@ -1,0 +1,53 @@
+{
+ "id": 900108,
+ "lines": [
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7077889624102",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7050441071809",
+   "qty": 3,
+   "amount": 80.7
+  },
+  {
+   "name": "Banan",
+   "ean": "7065650032408",
+   "qty": 3,
+   "amount": 56.19
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7045888064471",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7082941473581",
+   "qty": 1,
+   "amount": 79.9
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7095468603609",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7088356812019",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7043125121076",
+   "qty": 3,
+   "amount": 65.97
+  }
+ ]
+}

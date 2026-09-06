@@ -1,0 +1,53 @@
+{
+ "id": "demo-trumf-018",
+ "lines": [
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7038544672201",
+   "qty": 3,
+   "amount": 299.7
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7021618989087",
+   "qty": 2,
+   "amount": 99.8
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7039350553254",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7070779521829",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7021966826516",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7063395061265",
+   "qty": 1,
+   "amount": 24.9
+  },
+  {
+   "name": "Tomater",
+   "ean": "7022895020239",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7065240735926",
+   "qty": 1,
+   "amount": 79.9
+  }
+ ]
+}

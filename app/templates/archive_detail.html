@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ r.store }} · arkiv · grocious{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/archive/{{ provider }}">← Arkiv</a></p>
+<section class="panel detail">
+  <div class="dhead"><span class="badge {{ provider }}">{{ provider }}</span><h1>{{ r.store }}</h1>
+    <div class="mut">{{ r.date|day }} {{ r.time or '' }} · <b data-num>{{ r.amount|nok(2) }}</b></div>
+    <div class="dl"><a href="/archive/{{ provider }}/{{ r.archive_id }}.json">Komplett JSON</a><a href="/archive/{{ provider }}/{{ r.archive_id }}.zip">Alle arkivfiler ZIP</a></div>
+  </div>
+  {% if r.original_status == 'raw_data_only' %}<p class="mut">Komplette originale API-data er arkivert. Et eget kvitteringsbilde er ikke funnet i de undersøkte kallene.</p>
+  {% elif r.original_status == 'image_not_retrieved' %}<p class="mut">Rådata er arkivert. Leverandørbilde er ikke hentet ennå.</p>
+  {% elif r.original_status == 'not_offered' %}<p class="mut">Kilden oppgir at dette kjøpet ikke har egen kvittering. Kjøpsopplysningene er bevart.</p>{% endif %}
+  <h2>Originalfiler</h2>
+  <ul class="files">{% for d in r.documents %}<li><a href="/archive/{{ provider }}/{{ r.archive_id }}/file/{{ d.filename }}">{{ 'Leverandørens kvitteringsbilde' if d.mimetype.startswith('image/') else d.role }} ({{ d.mimetype }})</a></li>{% endfor %}</ul>
+  {% for d in r.documents %}{% if d.mimetype.startswith('image/') %}<img class="receipt-img" loading="lazy" alt="Leverandørens kvitteringsbilde" src="/archive/{{ provider }}/{{ r.archive_id }}/file/{{ d.filename }}">{% endif %}{% endfor %}
+  <h2>Varelinjer</h2>
+  <div class="scroll"><table class="data">
+    <thead><tr><th>Vare</th><th class="n">Antall</th><th>Enhet</th><th class="n">Beløp</th></tr></thead>
+    <tbody>{% for l in r.lines %}<tr><td>{{ l.name }}</td><td class="n">{{ l.qty if l.qty is not none else '—' }}</td><td>{{ l.unit or '—' }}</td><td class="n" data-num>{{ l.amount|nok(2) if l.amount is not none else '—' }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  <details class="raw"><summary>Alle kildefelter, inkludert betaling, pant, MVA og bonus der oppgitt</summary><pre>{{ raw }}</pre></details>
+  {% if r.validation.issues %}<p class="warn">Kontrollavvik: {{ r.validation.issues|join(', ') }}</p>{% endif %}
+  <p class="mut small">Arkivert {{ r.archived_at }}. Dokumenter kontrolleres mot SHA-256 ved nedlasting.</p>
+</section>
+{% endblock %}

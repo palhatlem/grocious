@@ -1,0 +1,29 @@
+{
+ "id": "demo-trumf-025",
+ "lines": [
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7077903715225",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Agurk",
+   "ean": "7097751006986",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7084191892902",
+   "qty": 1,
+   "amount": 26.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7053806488400",
+   "qty": 2,
+   "amount": 31.8
+  }
+ ]
+}

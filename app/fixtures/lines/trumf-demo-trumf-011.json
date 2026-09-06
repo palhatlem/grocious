@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-011",
+ "lines": [
+  {
+   "name": "Smør 500 g",
+   "ean": "7066127000565",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7043777447683",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Agurk",
+   "ean": "7085620239858",
+   "qty": 2,
+   "amount": 25.8
+  }
+ ]
+}

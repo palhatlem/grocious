@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-024",
+ "lines": [
+  {
+   "name": "Laks 400 g",
+   "ean": "7059522125044",
+   "qty": 3,
+   "amount": 239.7
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7035046663784",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7095098913504",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7066538407290",
+   "qty": 3,
+   "amount": 104.7
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7071750916420",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7039743028669",
+   "qty": 1,
+   "amount": 49.9
+  }
+ ]
+}

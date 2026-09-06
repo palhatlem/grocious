@@ -1,0 +1,59 @@
+{
+ "id": "demo-trumf-009",
+ "lines": [
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7071742521192",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7088255063277",
+   "qty": 2,
+   "amount": 97.8
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7087900177475",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7043563131119",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7099385479918",
+   "qty": 3,
+   "amount": 179.7
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7089642720170",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7039944068599",
+   "qty": 3,
+   "amount": 299.7
+  },
+  {
+   "name": "Agurk",
+   "ean": "7070648333279",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7059866151094",
+   "qty": 1,
+   "amount": 59.9
+  }
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "id": 900105,
+ "lines": [
+  {
+   "name": "Egg 12 pk",
+   "ean": "7066444568359",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7067508499697",
+   "qty": 2,
+   "amount": 89.8
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7039512764575",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7099213717771",
+   "qty": 1,
+   "amount": 59.9
+  }
+ ]
+}

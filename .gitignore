@@ -5,3 +5,7 @@ data/
 **/trumf_tokens.json
 **/*.png
 **/login.log
+__pycache__/
+.venv/
+.pytest_cache/
+.ruff_cache/

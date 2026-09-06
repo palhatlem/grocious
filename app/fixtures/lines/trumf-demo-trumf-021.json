@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-021",
+ "lines": [
+  {
+   "name": "Brød grovt",
+   "ean": "7068740843707",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7070304460723",
+   "qty": 2,
+   "amount": 53.8
+  },
+  {
+   "name": "Banan",
+   "ean": "7071903601567",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7098763250905",
+   "qty": 2,
+   "amount": 119.8
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7089407642537",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7082832572139",
+   "qty": 1,
+   "amount": 15.9
+  }
+ ]
+}

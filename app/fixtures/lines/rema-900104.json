@@ -1,0 +1,41 @@
+{
+ "id": 900104,
+ "lines": [
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7091799232297",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7045570931341",
+   "qty": 2,
+   "amount": 59.8
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7050356393528",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7056906057144",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7082846331409",
+   "qty": 3,
+   "amount": 146.7
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7045963548755",
+   "qty": 3,
+   "amount": 89.7
+  }
+ ]
+}

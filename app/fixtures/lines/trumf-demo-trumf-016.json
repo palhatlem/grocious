@@ -1,0 +1,29 @@
+{
+ "id": "demo-trumf-016",
+ "lines": [
+  {
+   "name": "Cottage cheese",
+   "ean": "7097556076644",
+   "qty": 1,
+   "amount": 26.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7075738897894",
+   "qty": 3,
+   "amount": 89.7
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7044622125549",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7046108229933",
+   "qty": 3,
+   "amount": 134.7
+  }
+ ]
+}

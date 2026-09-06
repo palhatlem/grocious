@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-001",
+ "lines": [
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7045107829050",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7049884834708",
+   "qty": 3,
+   "amount": 119.7
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7093022449418",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7086066037206",
+   "qty": 3,
+   "amount": 179.7
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7027930838511",
+   "qty": 3,
+   "amount": 149.7
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7042799272124",
+   "qty": 2,
+   "amount": 97.8
+  }
+ ]
+}

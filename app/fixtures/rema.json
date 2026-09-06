@@ -1,0 +1,188 @@
+{
+ "ok": true,
+ "purchaseTotal": 6677.24,
+ "discountTotal": 250.5,
+ "count": 22,
+ "receipts": [
+  {
+   "id": 900121,
+   "date": "2026-06-30 21:30",
+   "store": "REMA 1000 Tasta",
+   "amount": 423.47,
+   "discount": 24.9
+  },
+  {
+   "id": 900120,
+   "date": "2026-06-26 19:47",
+   "store": "REMA 1000 Hinna",
+   "amount": 373.55,
+   "discount": 12.5
+  },
+  {
+   "id": 900119,
+   "date": "2026-06-22 20:55",
+   "store": "REMA 1000 Tasta",
+   "amount": 363.13,
+   "discount": 12.5
+  },
+  {
+   "id": 900118,
+   "date": "2026-06-19 11:05",
+   "store": "REMA 1000 Madla",
+   "amount": 117.26,
+   "discount": 24.9
+  },
+  {
+   "id": 900117,
+   "date": "2026-06-18 08:29",
+   "store": "REMA 1000 Tasta",
+   "amount": 161.69,
+   "discount": 24.9
+  },
+  {
+   "id": 900116,
+   "date": "2026-06-17 12:34",
+   "store": "REMA 1000 Madla",
+   "amount": 348.1,
+   "discount": 0
+  },
+  {
+   "id": 900115,
+   "date": "2026-06-15 18:23",
+   "store": "REMA 1000 Hinna",
+   "amount": 428.82,
+   "discount": 8.0
+  },
+  {
+   "id": 900114,
+   "date": "2026-06-14 11:57",
+   "store": "REMA 1000 Tasta",
+   "amount": 511.53,
+   "discount": 0
+  },
+  {
+   "id": 900113,
+   "date": "2026-06-10 19:04",
+   "store": "REMA 1000 Tasta",
+   "amount": 120.6,
+   "discount": 8.0
+  },
+  {
+   "id": 900112,
+   "date": "2026-06-08 19:50",
+   "store": "REMA 1000 Madla",
+   "amount": 236.84,
+   "discount": 0
+  },
+  {
+   "id": 900111,
+   "date": "2026-06-06 13:46",
+   "store": "REMA 1000 Madla",
+   "amount": 459.8,
+   "discount": 24.9
+  },
+  {
+   "id": 900110,
+   "date": "2026-06-03 14:14",
+   "store": "REMA 1000 Tasta",
+   "amount": 339.4,
+   "discount": 0
+  },
+  {
+   "id": 900109,
+   "date": "2026-06-01 15:44",
+   "store": "REMA 1000 Hinna",
+   "amount": 128.78,
+   "discount": 0
+  },
+  {
+   "id": 900108,
+   "date": "2026-05-28 13:36",
+   "store": "REMA 1000 Hinna",
+   "amount": 491.36,
+   "discount": 24.9
+  },
+  {
+   "id": 900107,
+   "date": "2026-05-24 21:44",
+   "store": "REMA 1000 Hinna",
+   "amount": 372.43,
+   "discount": 12.5
+  },
+  {
+   "id": 900106,
+   "date": "2026-05-22 21:12",
+   "store": "REMA 1000 Tasta",
+   "amount": 424.97,
+   "discount": 12.5
+  },
+  {
+   "id": 900105,
+   "date": "2026-05-19 20:35",
+   "store": "REMA 1000 Tasta",
+   "amount": 220.59,
+   "discount": 0
+  },
+  {
+   "id": 900104,
+   "date": "2026-05-18 13:47",
+   "store": "REMA 1000 Tasta",
+   "amount": 412.99,
+   "discount": 0
+  },
+  {
+   "id": 900103,
+   "date": "2026-05-16 09:09",
+   "store": "REMA 1000 Hinna",
+   "amount": 378.46,
+   "discount": 35.0
+  },
+  {
+   "id": 900102,
+   "date": "2026-05-14 21:58",
+   "store": "REMA 1000 Hinna",
+   "amount": 111.6,
+   "discount": 12.5
+  },
+  {
+   "id": 900101,
+   "date": "2026-05-13 08:54",
+   "store": "REMA 1000 Hinna",
+   "amount": 197.47,
+   "discount": 12.5
+  },
+  {
+   "id": 900100,
+   "date": "2026-05-09 13:09",
+   "store": "REMA 1000 Hinna",
+   "amount": 54.4,
+   "discount": 0
+  }
+ ],
+ "offers": [
+  {
+   "code": "DEMO-KAFFE",
+   "desc": "Evergood kaffe 250 g – 30 % Æ-rabatt",
+   "activated": true,
+   "img": null
+  },
+  {
+   "code": "DEMO-LAKS",
+   "desc": "Laksefilet 400 g – 25 % rabatt",
+   "activated": false,
+   "img": null
+  },
+  {
+   "code": "DEMO-BROD",
+   "desc": "Alle grovbrød – 2 for 1",
+   "activated": false,
+   "img": null
+  },
+  {
+   "code": "DEMO-FRUKT",
+   "desc": "10 % på all frukt og grønt",
+   "activated": true,
+   "img": null
+  }
+ ]
+}

@@ -1,0 +1,53 @@
+{
+ "id": "demo-trumf-003",
+ "lines": [
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7082941679840",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7068885638324",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7076486557122",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7083453477332",
+   "qty": 3,
+   "amount": 179.7
+  },
+  {
+   "name": "Tomater",
+   "ean": "7068718772836",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Banan",
+   "ean": "7022066009731",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7077969703763",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7069364079515",
+   "qty": 1,
+   "amount": 21.99
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "id": "demo-trumf-013",
+ "lines": [
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7021671748704",
+   "qty": 2,
+   "amount": 179.8
+  },
+  {
+   "name": "Agurk",
+   "ean": "7095038708821",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7092317302700",
+   "qty": 2,
+   "amount": 199.8
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7030963984853",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7068594393010",
+   "qty": 1,
+   "amount": 29.9
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "id": 900111,
+ "lines": [
+  {
+   "name": "Laks 400 g",
+   "ean": "7039963831753",
+   "qty": 1,
+   "amount": 79.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7079699313032",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7055070726281",
+   "qty": 3,
+   "amount": 80.7
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7081404551285",
+   "qty": 3,
+   "amount": 149.7
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7094895344860",
+   "qty": 3,
+   "amount": 74.7
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7072282527208",
+   "qty": 1,
+   "amount": 29.9
+  }
+ ]
+}

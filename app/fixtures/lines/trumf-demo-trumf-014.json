@@ -1,0 +1,35 @@
+{
+ "id": "demo-trumf-014",
+ "lines": [
+  {
+   "name": "Smør 500 g",
+   "ean": "7063936724469",
+   "qty": 2,
+   "amount": 99.8
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7097995344356",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7074762136922",
+   "qty": 3,
+   "amount": 239.7
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7091016543051",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7086409941721",
+   "qty": 2,
+   "amount": 69.8
+  }
+ ]
+}

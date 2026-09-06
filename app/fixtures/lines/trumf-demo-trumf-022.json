@@ -1,0 +1,59 @@
+{
+ "id": "demo-trumf-022",
+ "lines": [
+  {
+   "name": "Egg 12 pk",
+   "ean": "7081967657197",
+   "qty": 3,
+   "amount": 146.7
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7047695977604",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7091752656330",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7060557409090",
+   "qty": 2,
+   "amount": 49.8
+  },
+  {
+   "name": "Agurk",
+   "ean": "7028384803391",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7050888122723",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7057401705735",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Banan",
+   "ean": "7028675225939",
+   "qty": 3,
+   "amount": 56.19
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7066093459709",
+   "qty": 1,
+   "amount": 29.9
+  }
+ ]
+}

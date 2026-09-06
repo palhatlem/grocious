@@ -1,0 +1,47 @@
+{
+ "id": 900121,
+ "lines": [
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7073370570488",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7075979095087",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Tomater",
+   "ean": "7060673135577",
+   "qty": 2,
+   "amount": 49.0
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7089896048737",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7055096792945",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7079714348327",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7082621301213",
+   "qty": 3,
+   "amount": 65.97
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ provider|capitalize }} – kvitteringsarkiv · grocious{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">← grocious</a></p>
+<section class="panel detail">
+  <div class="dhead"><span class="badge {{ provider }}">{{ provider }}</span><h1>{{ provider|capitalize }} – kvitteringsarkiv</h1>
+    <p class="mut">Komplette kildedata bevares. Nedlastede leverandørbilder vises der de finnes; en «laget PDF» i den gamle eksporten er en Grocious-visning.</p>
+    <p>{{ data.count }} arkiverte kjøp · {{ data.status.get('state') }} · <a href="/api/archive/{{ provider }}">Status/indeks JSON</a></p>
+    {% if data.get('image_status') %}<p class="mut small">Leverandørbilder: {{ data.image_status.get('already_archived', 0) + data.image_status.get('downloaded', 0) }} / {{ data.image_status.expected }} · {{ data.image_status.state }}{% if data.image_status.errors %} · {{ data.image_status.errors|length }} hente-feil{% endif %}</p>{% endif %}
+  </div>
+  <div class="scroll"><table class="data">
+    <thead><tr><th>Dato</th><th>Butikk</th><th class="n">Beløp</th><th>Arkiv</th></tr></thead>
+    <tbody>{% for r in data.receipts %}<tr><td>{{ r.date|day }}</td><td>{{ r.store }}</td><td class="n" data-num>{{ r.amount|nok(2) }}</td><td><a href="/archive/{{ provider }}/{{ r.archive_id }}">Alle detaljer og originalfiler</a></td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

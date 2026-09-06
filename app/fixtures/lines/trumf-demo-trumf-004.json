@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-004",
+ "lines": [
+  {
+   "name": "Egg 12 pk",
+   "ean": "7045396869801",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7027470483513",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7086272389455",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7036613284312",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7057259393414",
+   "qty": 2,
+   "amount": 89.8
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7069564783825",
+   "qty": 1,
+   "amount": 26.9
+  }
+ ]
+}

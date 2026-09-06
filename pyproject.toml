@@ -1,0 +1,18 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+# Data layer and the archive modules are Pål's / gus' code and out of scope for the UI job:
+extend-exclude = ["discovery", "login", "app/trumf_client.py", "app/rema_client.py", "app/receipt_archive.py",
+  "app/provider_archive.py", "app/coop_archive.py", "app/trumf_images.py", "tests/test_provider_archive.py",
+  "tests/test_receipt_archive.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E401", "E701", "E702", "E731", "E741"]
+
+[tool.ruff.lint.per-file-ignores]
+"app/webgui.py" = ["E501"]           # Pål's data code keeps its long lines
+"scripts/gen_fixtures.py" = ["E402", "E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,41 @@
+{
+ "id": 900107,
+ "lines": [
+  {
+   "name": "Cottage cheese",
+   "ean": "7025612861819",
+   "qty": 1,
+   "amount": 26.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7084225460488",
+   "qty": 1,
+   "amount": 34.9
+  },
+  {
+   "name": "Banan",
+   "ean": "7030149905765",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Tomater",
+   "ean": "7082459973909",
+   "qty": 3,
+   "amount": 73.5
+  },
+  {
+   "name": "Agurk",
+   "ean": "7096082245348",
+   "qty": 3,
+   "amount": 38.7
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7058367893452",
+   "qty": 3,
+   "amount": 179.7
+  }
+ ]
+}

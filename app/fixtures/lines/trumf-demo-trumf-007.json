@@ -1,0 +1,59 @@
+{
+ "id": "demo-trumf-007",
+ "lines": [
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7070583548790",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Banan",
+   "ean": "7080932227261",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Tomater",
+   "ean": "7086932238959",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7088173589691",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7055521663951",
+   "qty": 3,
+   "amount": 299.7
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7041825176545",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7098424932653",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7040690386076",
+   "qty": 3,
+   "amount": 146.7
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7047279312143",
+   "qty": 2,
+   "amount": 99.8
+  }
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "id": 900116,
+ "lines": [
+  {
+   "name": "Agurk",
+   "ean": "7055640943174",
+   "qty": 1,
+   "amount": 12.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7026085307570",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7036347992256",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7059160103826",
+   "qty": 3,
+   "amount": 80.7
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7066487632551",
+   "qty": 1,
+   "amount": 79.9
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7047156687199",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7021171968684",
+   "qty": 1,
+   "amount": 59.9
+  }
+ ]
+}

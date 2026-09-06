@@ -1,0 +1,47 @@
+{
+ "id": 900106,
+ "lines": [
+  {
+   "name": "Tomater",
+   "ean": "7084887648039",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7037827276632",
+   "qty": 1,
+   "amount": 79.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7027538441101",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7056941014719",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7066637886062",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7045775937145",
+   "qty": 3,
+   "amount": 65.97
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7097734298754",
+   "qty": 1,
+   "amount": 48.9
+  }
+ ]
+}

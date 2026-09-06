@@ -1,0 +1,47 @@
+{
+ "id": "demo-trumf-019",
+ "lines": [
+  {
+   "name": "Egg 12 pk",
+   "ean": "7062834221849",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7041918999170",
+   "qty": 2,
+   "amount": 119.8
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7063398069245",
+   "qty": 2,
+   "amount": 119.8
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7093610101194",
+   "qty": 3,
+   "amount": 239.7
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7043107178281",
+   "qty": 2,
+   "amount": 99.8
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7093183856961",
+   "qty": 3,
+   "amount": 89.7
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7082235355656",
+   "qty": 2,
+   "amount": 53.8
+  }
+ ]
+}

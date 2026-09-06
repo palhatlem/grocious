@@ -1,0 +1,59 @@
+{
+ "id": "demo-trumf-010",
+ "lines": [
+  {
+   "name": "Tomater",
+   "ean": "7057760524680",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7066369646396",
+   "qty": 3,
+   "amount": 179.7
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7052587154813",
+   "qty": 3,
+   "amount": 239.7
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7063187699323",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7072129643271",
+   "qty": 3,
+   "amount": 74.7
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7045852572142",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7030037048541",
+   "qty": 2,
+   "amount": 179.8
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7051079353666",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7095042055159",
+   "qty": 3,
+   "amount": 80.7
+  }
+ ]
+}

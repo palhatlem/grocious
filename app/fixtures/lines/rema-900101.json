@@ -1,0 +1,23 @@
+{
+ "id": 900101,
+ "lines": [
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7034981339534",
+   "qty": 2,
+   "amount": 119.8
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7083056057677",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7041989588465",
+   "qty": 1,
+   "amount": 32.77
+  }
+ ]
+}

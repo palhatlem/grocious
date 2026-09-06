@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-026",
+ "lines": [
+  {
+   "name": "Laks 400 g",
+   "ean": "7074691168458",
+   "qty": 2,
+   "amount": 159.8
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7071219949244",
+   "qty": 1,
+   "amount": 24.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7083495321038",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7042839699027",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7099029068069",
+   "qty": 3,
+   "amount": 146.7
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7031713867256",
+   "qty": 1,
+   "amount": 34.9
+  }
+ ]
+}

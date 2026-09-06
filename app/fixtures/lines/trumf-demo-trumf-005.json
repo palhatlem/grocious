@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-005",
+ "lines": [
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7027861459717",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Tomater",
+   "ean": "7063611084226",
+   "qty": 1,
+   "amount": 24.5
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7056512988650",
+   "qty": 1,
+   "amount": 26.9
+  }
+ ]
+}

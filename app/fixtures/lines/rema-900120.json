@@ -1,0 +1,47 @@
+{
+ "id": 900120,
+ "lines": [
+  {
+   "name": "Banan",
+   "ean": "7038010340854",
+   "qty": 2,
+   "amount": 37.46
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7090946823606",
+   "qty": 1,
+   "amount": 44.9
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7071004505751",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7083580245964",
+   "qty": 1,
+   "amount": 21.99
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7033034710584",
+   "qty": 3,
+   "amount": 89.7
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7040240647471",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7048502579495",
+   "qty": 3,
+   "amount": 80.7
+  }
+ ]
+}

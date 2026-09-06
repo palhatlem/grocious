@@ -4,12 +4,17 @@ Bonus, offers/coupons (with manual activate), receipts + JSON/CSV/PDF export.
 Read-only except opt-in Rema offer activation. Behind tinyauth; binds 127.0.0.1."""
 import json, os, io, csv, re, uuid, datetime, functools
 import requests
-from flask import Flask, Response, render_template_string, redirect, abort, request, jsonify, send_file
+from flask import Flask, Response, render_template, redirect, abort, request, jsonify, send_file
 import receipt_archive
+import demo, themes, ui
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
-app = Flask(__name__)
+DEMO = os.environ.get("GROCIOUS_DEMO", "") not in ("", "0", "false")
+if DEMO and "GROCERY_DATA" not in os.environ:  # demo archive (Coop) lives with the fixtures
+    os.environ["GROCERY_DATA"] = str(demo.FIXTURES / "data")
+app = Flask(__name__, template_folder="templates", static_folder="static")
+app.jinja_env.filters.update(ui.FILTERS)
 
 def _cache(ttl):
     def deco(fn):
@@ -21,6 +26,32 @@ def _cache(ttl):
                 box[a] = (now, fn(*a))
             return box[a][1]
         wrap.clear = box.clear
+        return wrap
+    return deco
+
+def _line_cache(chain):
+    """Receipt lines never change: cache them as JSON under GROCERY_DATA/cache/ keyed by receipt id,
+    so /api/export/<ym>.json?lines=1 is instant after the first fetch. Empty results are not cached."""
+    def deco(fn):
+        @functools.wraps(fn)
+        def wrap(rid):
+            path = os.path.join(DATA, "cache", f"{chain}-{rid}.json")
+            try:
+                with open(path, encoding="utf-8") as fh:
+                    return json.load(fh)
+            except (OSError, ValueError):
+                pass
+            lines = fn(rid)
+            if lines:
+                try:
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                    tmp = path + ".tmp"
+                    with open(tmp, "w", encoding="utf-8") as fh:
+                        json.dump(lines, fh, ensure_ascii=False)
+                    os.replace(tmp, path)
+                except OSError:
+                    pass
+            return lines
         return wrap
     return deco
 
@@ -76,6 +107,7 @@ def trumf_data():
     except Exception as e:
         return {"ok": False, "err": str(e)}
 
+@_line_cache("trumf")
 def trumf_lines(bid):
     s = trumf_session()
     txt = s.get(f"https://www.trumf.no/profil/kvitteringer/{bid}", headers={"RSC": "1"}, timeout=25).content.decode("utf-8", "ignore")
@@ -116,6 +148,7 @@ def rema_data():
     except Exception as e:
         return {"ok": False, "err": str(e)}
 
+@_line_cache("rema")
 def rema_lines(tid):
     rows = requests.get(f"https://api.rema.no/v1/bella/transaction/v2/rows/{tid}", headers=rema_headers(), timeout=20).json()
     rows = rows if isinstance(rows, list) else rows.get("rows", [])
@@ -149,103 +182,21 @@ def _download(chain, rid, fmt, lines, title):
         return Response(buf.read(), mimetype="application/pdf", headers={"Content-Disposition": f"attachment;filename={chain}-{rid}.pdf"})
     abort(404)
 
-TPL = """<!doctype html><html lang=nb><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>grocious</title><style>
-:root{--bg:#0f1116;--card:#1a1d26;--line:#262b36;--fg:#eceef2;--mut:#8b93a1;--pos:#5fd08a;--neg:#e8735a;
---trumf:#9b8cff;--rema:#4a90d9}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,sans-serif}
-.wrap{max-width:1040px;margin:0 auto;padding:0 20px 48px}
-header{background:linear-gradient(120deg,#1c1740,#132033 60%,#0f1116);border-radius:0 0 20px 20px;padding:26px 24px 22px;margin:0 -20px 24px}
-.brand{font-size:26px;font-weight:700;letter-spacing:-.5px}.brand .cart{filter:drop-shadow(0 2px 6px #0006)}
-.tag-line{color:var(--mut);font-size:13px;margin-top:2px}
-h2{font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin:30px 0 12px;font-weight:600}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:640px){.cards{grid-template-columns:1fr}}
-.stat{background:var(--card);border-radius:16px;padding:18px 20px;border-left:4px solid var(--line);box-shadow:0 1px 0 #ffffff08 inset}
-.stat.trumf{border-left-color:var(--trumf)}.stat.rema{border-left-color:var(--rema)}
-.stat .name{font-weight:600;font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.4px}
-.big{font-size:32px;font-weight:700;margin:4px 0 6px}.row{display:flex;justify-content:space-between;padding:2px 0;font-size:14px}
-.mut{color:var(--mut)}.pos{color:var(--pos)}.rt{text-align:right}
-.offers{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
-.offer{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
-.offer img{width:100%;height:120px;object-fit:cover;background:#0c0e13}
-.offer .b{padding:12px 13px;display:flex;flex-direction:column;gap:8px;flex:1}
-.badge{align-self:flex-start;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
-.badge.trumf{background:#2a2350;color:#c3b8ff}.badge.rema{background:#173049;color:#9fc7ef}
-.offer .t{font-size:14px;font-weight:500;line-height:1.35;flex:1}
-.btn{border:0;border-radius:9px;padding:8px 12px;font-weight:600;font-size:13px;cursor:pointer;background:var(--rema);color:#fff}
-.btn:hover{filter:brightness(1.1)}.done{color:var(--pos);font-size:13px;font-weight:600}
-table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;padding:8px 9px;border-bottom:1px solid var(--line)}
-th{color:var(--mut);font-weight:500}tr:hover td{background:#ffffff05}
-a{color:#7aa2f7;text-decoration:none}a:hover{text-decoration:underline}
-.dl a{margin-right:9px;font-size:12px}
-details{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
-summary{padding:14px 18px;cursor:pointer;font-weight:600;list-style:none}summary::-webkit-details-marker{display:none}
-summary::before{content:"▸ ";color:var(--mut)}details[open] summary::before{content:"▾ "}
-details .inner{padding:0 8px 8px}.err{color:var(--neg)}.pill{display:inline-block;background:var(--line);border-radius:20px;padding:1px 9px;font-size:12px;color:var(--mut);margin-left:6px}
-</style></head><body>
-<header><div class=wrap style="padding:0"><div class=brand><span class=cart>🛒</span> grocious</div>
-<div class=tag-line>dagligvarebonus &amp; kvitteringer · therack</div></div></header>
-<div class=wrap>
-<div class=cards>
- <div class="stat trumf"><div class=name>Trumf</div>
-  {% if t.ok %}<div class="big pos">{{ '%.2f'|format(t.saldo) }} kr</div>
-   <div class=row><span class=mut>Akkumulert</span><span>{{ '%.0f'|format(t.akkumulert) }} kr</span></div>
-   <div class=row><span class=mut>Kvitteringer</span><span>{{ t.count }}</span></div>
-   <div class=row><span class=mut>Kampanjer</span><span>{{ t.offers|length }}</span></div>
-  {% else %}<div class=err>{{ t.err }}</div>{% endif %}</div>
- <div class="stat rema"><div class=name>Rema 1000</div>
-  {% if r.ok %}<div class=big>{{ '%.0f'|format(r.purchaseTotal) }} kr</div>
-   <div class=row><span class=mut>Rabatt spart</span><span class=pos>{{ '%.0f'|format(r.discountTotal) }} kr</span></div>
-   <div class=row><span class=mut>Kvitteringer</span><span>{{ r.count }}</span></div>
-   <div class=row><span class=mut>Tilbud</span><span>{{ r.offers|length }}</span></div>
-  {% else %}<div class=err>{{ r.err }}</div>{% endif %}</div>
- <div class="stat" style="border-top:3px solid #46b5d1"><div class=name>Coop</div>
-  <div class=big>{{ c.count }} kvitteringer</div>
-  <div class=row><span class=mut>Original-PDF-er</span><span>{{ c.status.get('original_pdf_count', c.count) }}</span></div>
-  <div class=row><span class=mut>Arkiv</span><span>{{ c.status.get('state', 'not_started') }}</span></div>
-  {% if c.status.get('oldest_date') %}<div class=mut>{{c.status.oldest_date}} – {{c.status.newest_date}}</div>{% endif %}
- </div>
-</div>
+# Presentation lives in templates/ + static/ (helpers in ui.py); themes in themes/ (themes.py).
 
-<h2>Tilbud &amp; kuponger <span class=pill>aktiver de du vil selv</span></h2>
-<div class=offers>
-{% if r.ok %}{% for o in r.offers %}<div class=offer>
-  {% if o.img %}<img src="{{o.img}}" loading=lazy onerror="this.style.display='none'">{% endif %}
-  <div class=b><span class="badge rema">Rema</span><div class=t>{{ o.desc }}</div>
-   {% if o.activated %}<span class=done>✓ Aktivert</span>
-   {% else %}<form method=post action="/rema/offer/{{o.code}}/activate" style=margin:0><button class=btn>Aktiver</button></form>{% endif %}
-  </div></div>{% endfor %}{% endif %}
-{% if t.ok %}{% for o in t.offers %}<div class=offer><div class=b><span class="badge trumf">Trumf</span>
-  <div class=t><b>{{ o.title }}</b><br><span class=mut style=font-size:13px>{{ o.desc }}</span></div></div></div>{% endfor %}{% endif %}
-</div>
 
-<h2>Kvitteringer</h2>
-<p><a href="/archive/trumf">Trumf-arkiv: originalbilder og rådata</a> · <a href="/archive/rema">Rema-arkiv: komplette rådata</a></p>
-{% if t.ok and t.receipts %}<details><summary>Trumf <span class=pill>{{ t.receipts|length }}</span></summary><div class=inner>
-<table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Bonus</th><th>Last ned</th></tr>
-{% for x in t.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
-<td class="rt pos">{{ '%.2f'|format(x.bonus or 0) }}</td><td class=dl>{% if x.hasReceipt %}<a href="/trumf/receipt/{{x.id}}.json">json</a><a href="/trumf/receipt/{{x.id}}.csv">csv</a><a href="/trumf/receipt/{{x.id}}.pdf">laget PDF</a>{% else %}<span class=mut>—</span>{% endif %}</td></tr>{% endfor %}
-</table></div></details>{% endif %}
-{% if r.ok %}<details><summary>Rema 1000 <span class=pill>{{ r.receipts|length }}</span></summary><div class=inner>
-<table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th class=rt>Rabatt</th><th>Last ned</th></tr>
-{% for x in r.receipts %}<tr><td>{{ x.date }}</td><td>{{ x.store }}</td><td class=rt>{{ '%.2f'|format(x.amount) }}</td>
-<td class="rt {{ 'pos' if x.discount else 'mut' }}">{{ '%.2f'|format(x.discount or 0) }}</td>
-<td class=dl><a href="/rema/receipt/{{x.id}}.json">json</a><a href="/rema/receipt/{{x.id}}.csv">csv</a><a href="/rema/receipt/{{x.id}}.pdf">laget PDF</a></td></tr>{% endfor %}
-</table></div></details>{% endif %}
-{% if c.ok %}<details><summary>Coop <span class=pill>{{c.count}}</span></summary><div class=inner>
-<p class=mut>Originale Coop-PDF-er og komplette kildedata er bevart i arkivet.</p>
-{% if c.status.get('errors') %}<p class=err>{{c.status.errors|length}} importavvik – se <a href="/api/coop/status">status</a>.</p>{% endif %}
-<table><tr><th>Dato</th><th>Butikk</th><th class=rt>Beløp</th><th>Kvittering</th></tr>
-{% for x in c.receipts %}<tr><td>{{x.date}} {{x.time or ''}}</td><td>{{x.store}}</td><td class=rt>{{'%.2f'|format(x.amount or 0)}}</td>
-<td class=dl><a href="/coop/receipt/{{x.archive_id}}">Detaljer</a><a href="/coop/receipt/{{x.archive_id}}.pdf">Original PDF</a><a href="/coop/receipt/{{x.archive_id}}.json">JSON</a><a href="/coop/receipt/{{x.archive_id}}.csv">CSV</a>
-{% if x.validation.issues %}<span class=mut>Kontrollavvik</span>{% endif %}</td></tr>{% endfor %}</table>
-</div></details>{% endif %}
-<p class=mut style="margin-top:26px;font-size:12px">Live oversikter caches 5 min · Kvitteringsarkiv lagres lokalt · <a href="/api/coop/status">importstatus</a></p>
-</div></body></html>"""
+if DEMO:  # anonymised fixtures, no tokens, no network — the real functions above stay as they are
+    trumf_data, rema_data, trumf_lines, rema_lines, rema_activate = (
+        demo.trumf_data, demo.rema_data, demo.trumf_lines, demo.rema_lines, demo.rema_activate)
 
 @app.route("/")
 def index():
-    return render_template_string(TPL, t=trumf_data(), r=rema_data(), c=receipt_archive.summary('coop'))
+    t, r, c = trumf_data(), rema_data(), receipt_archive.summary('coop')
+    return render_template("index.html", t=t, r=r, c=c, demo=DEMO, **ui.context(t, r, c))
+
+@app.route("/themes.css")
+def themes_css():
+    return Response(themes.render_css(), mimetype="text/css", headers={"Cache-Control": "public, max-age=300"})
 
 @app.route("/rema/offer/<code>/activate", methods=["POST"])
 def rema_offer_activate(code):
@@ -276,18 +227,7 @@ def coop_record(rid):
 @app.route('/coop/receipt/<rid>')
 def coop_detail(rid):
     r=coop_record(rid)
-    return render_template_string('''<!doctype html><html lang=nb><meta charset=utf-8>
-<meta name=viewport content="width=device-width,initial-scale=1"><title>Coop-kvittering</title>
-<style>body{background:#0f1116;color:#eceef2;font:15px/1.6 system-ui;max-width:1000px;margin:24px auto;padding:16px}a{color:#72cce1}table{border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #333}pre{white-space:pre-wrap}details{margin:20px 0}.mut{color:#aaa}</style>
-<a href="/">← Grocious</a><h1>{{r.store}}</h1><p>{{r.date}} {{r.time or ''}} · {{'%.2f'|format(r.amount or 0)}} NOK</p>
-<p><a href="{{r.archive_id}}.pdf">Original PDF</a> · <a href="{{r.archive_id}}.json">Komplett JSON</a> · <a href="{{r.archive_id}}.csv">Varelinjer CSV</a></p>
-<table><tr><th>Vare</th><th>Antall/enhet oppgitt av Coop</th><th>Beløp</th><th>Rabatt</th></tr>
-{% for l in r.lines %}<tr><td>{{l.name}}</td><td>{{l.quantity_text or '—'}}</td><td>{{l.amount if l.amount is not none else '—'}}</td><td>{{l.discount if l.discount is not none else '—'}}</td></tr>{% endfor %}</table>
-{% if r.tax %}<h2>MVA</h2><table><tr><th>Del</th><th>Grunnlag</th><th>Sats</th><th>MVA</th><th>Sum</th></tr>{% for t in r.tax %}<tr><td>{{'Kjøp' if t.section=='purchase' else 'Medlemsfordel'}}</td><td>{{'%.2f'|format(t.base_minor/100)}}</td><td>{{t.rate}}%</td><td>{{'%.2f'|format(t.tax_minor/100)}}</td><td>{{'%.2f'|format(t.total_minor/100)}}</td></tr>{% endfor %}</table>{% endif %}
-<h2>Medlemsfordeler</h2>{% for name,value in benefits %}{% if value is not none %}<div>{{name}}: {{value}}</div>{% endif %}{% endfor %}
-<details><summary>Hele originalteksten, inkludert betaling og referanser</summary><pre>{{r.document_text}}</pre></details>
-{% if r.validation.issues %}<p>Kontrollavvik: {{r.validation.issues|join(', ')}}. Originalen og alle kildedata er bevart.</p>{% endif %}
-<p class=mut>Arkivert {{r.archived_at}}. Ukjent antall eller rabatt vises som «—».</p></html>''', r=r,
+    return render_template("coop_detail.html", r=r, demo=DEMO, themes=themes.load_themes(),
       benefits=[(label,r['benefits'].get(k)) for k,label in [('purchaseReturn','Kjøpeutbytte'),('memberDiscount','Medlemsrabatt'),('couponDiscount','Kupongrabatt'),('coopMastercard','Coop Mastercard'),('totalMemberBenefit','Oppgitt medlemsfordel')]])
 
 @app.route('/coop/receipt/<rid>.<fmt>')
@@ -376,25 +316,15 @@ def archived_summary(source):
 def archived_list(source):
     try:data=receipt_archive.summary(source)
     except ValueError:abort(404)
-    return render_template_string(ARCHIVE_STYLE+'''<a href="/">← Grocious</a><h1>{{provider|capitalize}} – kvitteringsarkiv</h1>
-<p>Komplette kildedata bevares. Nedlastede leverandørbilder vises der de finnes; en «laget PDF» i den gamle eksporten er en Grocious-visning.</p>
-<p>{{data.count}} arkiverte kjøp · {{data.status.get('state')}} · <a href="/api/archive/{{provider}}">Status/indeks JSON</a></p>
-{% if data.get('image_status') %}<p>Leverandørbilder: {{data.image_status.get('already_archived',0)+data.image_status.get('downloaded',0)}} / {{data.image_status.expected}} · {{data.image_status.state}}{% if data.image_status.errors %} · {{data.image_status.errors|length}} hente-feil{% endif %}</p>{% endif %}
-<table><tr><th>Dato</th><th>Butikk</th><th>Beløp</th><th>Arkiv</th></tr>{% for r in data.receipts %}<tr><td>{{r.date}}</td><td>{{r.store}}</td><td>{{r.amount}}</td><td><a href="/archive/{{provider}}/{{r.archive_id}}">Alle detaljer og originalfiler</a></td></tr>{% endfor %}</table>''',provider=source,data=data)
+    return render_template("archive_list.html", provider=source, data=data, demo=DEMO, themes=themes.load_themes())
 
-ARCHIVE_STYLE='''<!doctype html><html lang=nb><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Grocious kvitteringsarkiv</title><style>body{background:#0f1116;color:#eceef2;font:15px/1.6 system-ui;max-width:1000px;margin:24px auto;padding:16px}a{color:#72cce1}table{border-collapse:collapse;width:100%}td,th{padding:8px;text-align:left;border-bottom:1px solid #333}pre{white-space:pre-wrap;overflow-wrap:anywhere}img{max-width:100%}</style>'''
+# archive pages: templates/archive_list.html + archive_detail.html
 
 @app.route('/archive/<source>/<rid>')
 def archived_detail(source,rid):
     r=archived_record(source,rid)
-    return render_template_string(ARCHIVE_STYLE+'''<a href="/archive/{{provider}}">← Arkiv</a><h1>{{r.store}}</h1><p>{{r.date}} {{r.time or ''}} · {{r.amount}} NOK</p>
-<p><a href="/archive/{{provider}}/{{r.archive_id}}.json">Komplett JSON</a> · <a href="/archive/{{provider}}/{{r.archive_id}}.zip">Alle arkivfiler ZIP</a></p>
-{% if r.original_status=='raw_data_only' %}<p>Komplette originale API-data er arkivert. Et eget kvitteringsbilde er ikke funnet i de undersøkte kallene.</p>{% elif r.original_status=='image_not_retrieved' %}<p>Rådata er arkivert. Leverandørbilde er ikke hentet ennå.</p>{% elif r.original_status=='not_offered' %}<p>Kilden oppgir at dette kjøpet ikke har egen kvittering. Kjøpsopplysningene er bevart.</p>{% endif %}
-<h2>Originalfiler</h2><ul>{% for d in r.documents %}<li><a href="/archive/{{provider}}/{{r.archive_id}}/file/{{d.filename}}">{{'Leverandørens kvitteringsbilde' if d.mimetype.startswith('image/') else d.role}} ({{d.mimetype}})</a></li>{% endfor %}</ul>
-{% for d in r.documents %}{% if d.mimetype.startswith('image/') %}<img loading=lazy alt="Leverandørens kvitteringsbilde" src="/archive/{{provider}}/{{r.archive_id}}/file/{{d.filename}}">{% endif %}{% endfor %}
-<h2>Varelinjer</h2><table><tr><th>Vare</th><th>Antall</th><th>Enhet</th><th>Beløp</th></tr>{% for l in r.lines %}<tr><td>{{l.name}}</td><td>{{l.qty if l.qty is not none else '—'}}</td><td>{{l.unit or '—'}}</td><td>{{l.amount if l.amount is not none else '—'}}</td></tr>{% endfor %}</table>
-<details><summary>Alle kildefelter, inkludert betaling, pant, MVA og bonus der oppgitt</summary><pre>{{raw}}</pre></details>
-{% if r.validation.issues %}<p>Kontrollavvik: {{r.validation.issues|join(', ')}}</p>{% endif %}<p>Arkivert {{r.archived_at}}. Dokumenter kontrolleres mot SHA-256 ved nedlasting.</p>''',r=r,provider=source,raw=json.dumps(r['source'],ensure_ascii=False,indent=2))
+    return render_template("archive_detail.html", r=r, provider=source, raw=json.dumps(r['source'], ensure_ascii=False, indent=2),
+                           demo=DEMO, themes=themes.load_themes())
 
 @app.route('/archive/<source>/<rid>.<fmt>')
 def archived_download(source,rid,fmt):

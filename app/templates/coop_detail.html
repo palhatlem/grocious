@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Coop-kvittering · grocious{% endblock %}
+{% block content %}
+<p class="crumbs"><a href="/">← grocious</a></p>
+<section class="panel detail">
+  <div class="dhead">
+    <span class="badge coop">Coop</span>
+    <h1>{{ r.store }}</h1>
+    <div class="mut">{{ r.date|day }} {{ r.time or '' }} · <b data-num>{{ r.amount|nok(2) }}</b></div>
+    <div class="dl"><a href="/coop/receipt/{{ r.archive_id }}.pdf">Original PDF</a><a href="/coop/receipt/{{ r.archive_id }}.json">Komplett JSON</a><a href="/coop/receipt/{{ r.archive_id }}.csv">Varelinjer CSV</a></div>
+  </div>
+  <h2>Varelinjer</h2>
+  <div class="scroll"><table class="data">
+    <thead><tr><th>Vare</th><th>Antall/enhet oppgitt av Coop</th><th class="n">Beløp</th><th class="n">Rabatt</th></tr></thead>
+    <tbody>{% for l in r.lines %}<tr><td>{{ l.name }}</td><td>{{ l.quantity_text or '—' }}</td>
+      <td class="n" data-num>{{ l.amount|nok(2) if l.amount is not none else '—' }}</td><td class="n" data-num>{{ l.discount|nok(2) if l.discount is not none else '—' }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% if r.tax %}
+  <h2>MVA</h2>
+  <div class="scroll"><table class="data">
+    <thead><tr><th>Del</th><th class="n">Grunnlag</th><th class="n">Sats</th><th class="n">MVA</th><th class="n">Sum</th></tr></thead>
+    <tbody>{% for t in r.tax %}<tr><td>{{ 'Kjøp' if t.section == 'purchase' else 'Medlemsfordel' }}</td><td class="n" data-num>{{ (t.base_minor / 100)|nok(2) }}</td><td class="n">{{ t.rate }} %</td><td class="n" data-num>{{ (t.tax_minor / 100)|nok(2) }}</td><td class="n" data-num>{{ (t.total_minor / 100)|nok(2) }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% endif %}
+  <h2>Medlemsfordeler</h2>
+  <dl class="kv">{% for name, value in benefits %}{% if value is not none %}<dt>{{ name }}</dt><dd>{{ value }}</dd>{% endif %}{% endfor %}</dl>
+  <details class="raw"><summary>Hele originalteksten, inkludert betaling og referanser</summary><pre>{{ r.document_text }}</pre></details>
+  {% if r.validation.issues %}<p class="warn">Kontrollavvik: {{ r.validation.issues|join(', ') }}. Originalen og alle kildedata er bevart.</p>{% endif %}
+  <p class="mut small">Arkivert {{ r.archived_at }}. Ukjent antall eller rabatt vises som «—».</p>
+</section>
+{% endblock %}

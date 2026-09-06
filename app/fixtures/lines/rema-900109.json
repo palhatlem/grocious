@@ -1,0 +1,23 @@
+{
+ "id": 900109,
+ "lines": [
+  {
+   "name": "Kaffe Evergood 250 g",
+   "ean": "7039860351640",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Melk 1 l Tine",
+   "ean": "7034977147721",
+   "qty": 2,
+   "amount": 43.98
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7093646738335",
+   "qty": 1,
+   "amount": 24.9
+  }
+ ]
+}

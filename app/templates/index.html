@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="stats">
+  <div class="stat trumf">
+    <div class="label"><span class="dot"></span>Trumf</div>
+    {% if t.ok %}
+    <div class="value pos" data-num>{{ t.saldo|nok(2) }}</div>
+    <div class="sub">bonus å bruke · oppdatert {{ t.oppdatert|day }}</div>
+    <dl class="kv">
+      <dt>Akkumulert</dt><dd data-num>{{ t.akkumulert|nok }}</dd>
+      <dt>Kvitteringer</dt><dd>{{ t.count }}</dd>
+      <dt>Kampanjer</dt><dd>{{ t.offers|length }}</dd>
+    </dl>
+    {% else %}<div class="err">Trumf: {{ t.err }}</div>{% endif %}
+  </div>
+  <div class="stat rema">
+    <div class="label"><span class="dot"></span>Rema 1000</div>
+    {% if r.ok %}
+    <div class="value" data-num>{{ r.purchaseTotal|nok }}</div>
+    <div class="sub">handlet totalt · <span class="pos" data-num>{{ r.discountTotal|nok }}</span> spart</div>
+    <dl class="kv">
+      <dt>Kvitteringer</dt><dd>{{ r.count }}</dd>
+      <dt>Tilbud</dt><dd>{{ r.offers|length }} <span class="mut">({{ r.offers|selectattr('activated')|list|length }} aktivert)</span></dd>
+    </dl>
+    {% else %}<div class="err">Rema: {{ r.err }}</div>{% endif %}
+  </div>
+  <div class="stat coop">
+    <div class="label"><span class="dot"></span>Coop</div>
+    <div class="value">{{ c.count }} <span class="unit">kvitteringer</span></div>
+    <div class="sub">arkiv {{ c.status.get('state', 'not_started') }}{% if c.status.get('oldest_date') %} · {{ c.status.oldest_date|day }} – {{ c.status.newest_date|day }}{% endif %}</div>
+    <dl class="kv">
+      <dt>Original-PDF-er</dt><dd>{{ c.status.get('original_pdf_count', c.count) }}</dd>
+      {% if c.status.get('errors') %}<dt>Importavvik</dt><dd class="neg"><a href="/api/coop/status">{{ c.status.errors|length }}</a></dd>{% endif %}
+    </dl>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Tilbud &amp; kuponger <span class="pill">aktiver de du vil selv</span></h2>
+  <div class="offers">
+    {% if r.ok %}{% for o in r.offers %}
+    <div class="offer">
+      {% if o.img %}<img src="{{ o.img }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}
+      <div class="b"><span class="badge rema">Rema</span><div class="t">{{ o.desc }}</div>
+        {% if o.activated %}<span class="done">✓ Aktivert</span>
+        {% else %}<form method="post" action="/rema/offer/{{ o.code }}/activate"><button class="btn">Aktiver</button></form>{% endif %}
+      </div>
+    </div>
+    {% endfor %}{% endif %}
+    {% if t.ok %}{% for o in t.offers %}
+    <div class="offer"><div class="b"><span class="badge trumf">Trumf</span>
+      <div class="t"><b>{{ o.title }}</b><br><span class="mut small">{{ o.desc }}</span></div></div></div>
+    {% endfor %}{% endif %}
+    {% if not (r.ok and r.offers) and not (t.ok and t.offers) %}<p class="mut">Ingen tilbud akkurat nå.</p>{% endif %}
+  </div>
+</section>
+
+<section class="panel" id="receipts">
+  <h2>Kvitteringer</h2>
+  <div class="filters">
+    <div class="chips" role="group" aria-label="Kjede">
+      <button class="chip on" data-chain="">Alle</button>
+      <button class="chip" data-chain="trumf">Trumf</button>
+      <button class="chip" data-chain="rema">Rema</button>
+      <button class="chip" data-chain="coop">Coop</button>
+    </div>
+    <select id="month" aria-label="Måned">
+      <option value="">Alle måneder</option>
+      {% for m in months %}<option value="{{ m.ym }}">{{ m.label }}</option>{% endfor %}
+    </select>
+    <span class="count mut small" id="count"></span>
+  </div>
+  <div class="totals small mut" id="totals"></div>
+  <ul class="receipts" id="list">
+    {% if t.ok %}{% for x in t.receipts %}
+    <li class="receipt" data-chain="trumf" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-amount="{{ x.amount or 0 }}" data-bonus="{{ x.bonus or 0 }}"
+        data-lines="{% if x.hasReceipt %}/trumf/receipt/{{ x.id }}.json{% endif %}">
+      <button class="head" type="button" aria-expanded="false">
+        <span class="badge trumf">{{ x.chain or 'Trumf' }}</span>
+        <span class="store">{{ x.store }}</span>
+        <span class="date">{{ x.date|day }}</span>
+        <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
+        <span class="extra pos" data-num>{% if x.bonus %}+{{ x.bonus|nok(2) }}{% endif %}</span>
+        <span class="caret" aria-hidden="true">▸</span>
+      </button>
+      <div class="body" hidden>
+        <div class="lines"><p class="mut small">{% if x.hasReceipt %}Laster varelinjer …{% else %}Ingen varelinjer tilgjengelig for dette kjøpet.{% endif %}</p></div>
+        {% if x.hasReceipt %}<div class="dl"><a href="/trumf/receipt/{{ x.id }}.json">json</a><a href="/trumf/receipt/{{ x.id }}.csv">csv</a><a href="/trumf/receipt/{{ x.id }}.pdf">laget PDF</a></div>{% endif %}
+      </div>
+    </li>
+    {% endfor %}{% endif %}
+    {% if r.ok %}{% for x in r.receipts %}
+    <li class="receipt" data-chain="rema" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-amount="{{ x.amount or 0 }}" data-discount="{{ x.discount or 0 }}"
+        data-lines="/rema/receipt/{{ x.id }}.json">
+      <button class="head" type="button" aria-expanded="false">
+        <span class="badge rema">Rema</span>
+        <span class="store">{{ x.store }}</span>
+        <span class="date">{{ x.date|dt }}</span>
+        <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
+        <span class="extra pos" data-num>{% if x.discount %}−{{ x.discount|nok(2) }}{% endif %}</span>
+        <span class="caret" aria-hidden="true">▸</span>
+      </button>
+      <div class="body" hidden>
+        <div class="lines"><p class="mut small">Laster varelinjer …</p></div>
+        <div class="dl"><a href="/rema/receipt/{{ x.id }}.json">json</a><a href="/rema/receipt/{{ x.id }}.csv">csv</a><a href="/rema/receipt/{{ x.id }}.pdf">laget PDF</a></div>
+      </div>
+    </li>
+    {% endfor %}{% endif %}
+    {% for x in c.receipts %}
+    <li class="receipt" data-chain="coop" data-month="{{ (x.date or '')[:7] }}" data-date="{{ x.date }}" data-amount="{{ x.amount or 0 }}" data-lines="/coop/receipt/{{ x.archive_id }}.json">
+      <button class="head" type="button" aria-expanded="false">
+        <span class="badge coop">Coop</span>
+        <span class="store">{{ x.store }}</span>
+        <span class="date">{{ x.date|day }} {{ x.time or '' }}</span>
+        <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
+        <span class="extra mut">{% if x.validation and x.validation.issues %}kontrollavvik{% endif %}</span>
+        <span class="caret" aria-hidden="true">▸</span>
+      </button>
+      <div class="body" hidden>
+        <div class="lines"><p class="mut small">Laster varelinjer …</p></div>
+        <div class="dl"><a href="/coop/receipt/{{ x.archive_id }}">Detaljer</a><a href="/coop/receipt/{{ x.archive_id }}.pdf">Original PDF</a><a href="/coop/receipt/{{ x.archive_id }}.json">json</a><a href="/coop/receipt/{{ x.archive_id }}.csv">csv</a></div>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="mut small" id="empty" hidden>Ingen kvitteringer for valget.</p>
+  <p class="mut small archives">Arkiv med originalfiler: <a href="/archive/trumf">Trumf</a> · <a href="/archive/rema">Rema</a> · <a href="/api/coop/status">Coop importstatus</a></p>
+</section>
+{% endblock %}

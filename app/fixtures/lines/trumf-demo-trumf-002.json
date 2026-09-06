@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-002",
+ "lines": [
+  {
+   "name": "Tomater",
+   "ean": "7039684345571",
+   "qty": 3,
+   "amount": 73.5
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7035817043933",
+   "qty": 1,
+   "amount": 24.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7090672691697",
+   "qty": 1,
+   "amount": 29.9
+  }
+ ]
+}

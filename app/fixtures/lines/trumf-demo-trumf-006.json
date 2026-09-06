@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-006",
+ "lines": [
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7060082050512",
+   "qty": 3,
+   "amount": 74.7
+  },
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7027740731043",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7073106528711",
+   "qty": 3,
+   "amount": 98.31
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7094053337255",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7066362927063",
+   "qty": 3,
+   "amount": 119.7
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7086889074316",
+   "qty": 3,
+   "amount": 47.7
+  }
+ ]
+}

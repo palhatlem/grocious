@@ -1,0 +1,23 @@
+{
+ "id": 900110,
+ "lines": [
+  {
+   "name": "Brød grovt",
+   "ean": "7029613117010",
+   "qty": 3,
+   "amount": 119.7
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7076619369660",
+   "qty": 2,
+   "amount": 159.8
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7073741201717",
+   "qty": 1,
+   "amount": 59.9
+  }
+ ]
+}

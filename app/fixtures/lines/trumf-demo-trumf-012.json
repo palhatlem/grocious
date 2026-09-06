@@ -1,0 +1,47 @@
+{
+ "id": "demo-trumf-012",
+ "lines": [
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7043765976810",
+   "qty": 1,
+   "amount": 24.9
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7097580172686",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Laks 400 g",
+   "ean": "7092640516353",
+   "qty": 1,
+   "amount": 79.9
+  },
+  {
+   "name": "Smør 500 g",
+   "ean": "7079051197437",
+   "qty": 1,
+   "amount": 49.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7039286159088",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7048012321098",
+   "qty": 1,
+   "amount": 89.9
+  },
+  {
+   "name": "Banan",
+   "ean": "7097726153157",
+   "qty": 2,
+   "amount": 37.46
+  }
+ ]
+}

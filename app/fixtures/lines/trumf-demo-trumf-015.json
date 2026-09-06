@@ -1,0 +1,41 @@
+{
+ "id": "demo-trumf-015",
+ "lines": [
+  {
+   "name": "Banan",
+   "ean": "7030591852396",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7094897952821",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Paprika 3 pk",
+   "ean": "7087154213709",
+   "qty": 3,
+   "amount": 104.7
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7036456544443",
+   "qty": 3,
+   "amount": 134.7
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7021775122848",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Cottage cheese",
+   "ean": "7069738272676",
+   "qty": 1,
+   "amount": 26.9
+  }
+ ]
+}

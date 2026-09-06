@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-008",
+ "lines": [
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7088447171288",
+   "qty": 2,
+   "amount": 65.54
+  },
+  {
+   "name": "Brød grovt",
+   "ean": "7094891398335",
+   "qty": 1,
+   "amount": 39.9
+  },
+  {
+   "name": "Pepsi Max 1,5 l",
+   "ean": "7067316800980",
+   "qty": 1,
+   "amount": 29.9
+  }
+ ]
+}

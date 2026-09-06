@@ -1,0 +1,23 @@
+{
+ "id": "demo-trumf-017",
+ "lines": [
+  {
+   "name": "Eple Pink Lady",
+   "ean": "7095980489563",
+   "qty": 1,
+   "amount": 32.77
+  },
+  {
+   "name": "Grandiosa",
+   "ean": "7023954338716",
+   "qty": 3,
+   "amount": 134.7
+  },
+  {
+   "name": "Havregryn 1 kg",
+   "ean": "7040268774805",
+   "qty": 1,
+   "amount": 24.9
+  }
+ ]
+}

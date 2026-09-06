@@ -1,0 +1,47 @@
+{
+ "id": 900119,
+ "lines": [
+  {
+   "name": "Yoghurt 4 pk",
+   "ean": "7091402899579",
+   "qty": 1,
+   "amount": 29.9
+  },
+  {
+   "name": "Pasta 500 g",
+   "ean": "7093003736780",
+   "qty": 1,
+   "amount": 15.9
+  },
+  {
+   "name": "Banan",
+   "ean": "7093139688309",
+   "qty": 1,
+   "amount": 18.73
+  },
+  {
+   "name": "Kyllingfilet 700 g",
+   "ean": "7083885453138",
+   "qty": 1,
+   "amount": 99.9
+  },
+  {
+   "name": "Egg 12 pk",
+   "ean": "7062782396425",
+   "qty": 1,
+   "amount": 48.9
+  },
+  {
+   "name": "Toalettpapir 8 pk",
+   "ean": "7030332403604",
+   "qty": 1,
+   "amount": 59.9
+  },
+  {
+   "name": "Ost Norvegia 500 g",
+   "ean": "7024138003888",
+   "qty": 1,
+   "amount": 89.9
+  }
+ ]
+}
