@@ -1,0 +1,23 @@
+{
+ "id": "gruvbox",
+ "label": "Gruvbox",
+ "scheme": "dark",
+ "colors": {
+  "bg": "#282828",
+  "bg2": "#1d2021",
+  "card": "#32302f",
+  "card2": "#3c3836",
+  "line": "#504945",
+  "fg": "#ebdbb2",
+  "mut": "#a89984",
+  "accent": "#83a598",
+  "accent-fg": "#1d2021",
+  "pos": "#b8bb26",
+  "neg": "#fb4934",
+  "warn": "#fabd2f",
+  "trumf": "#d3869b",
+  "rema": "#83a598",
+  "coop": "#8ec07c",
+  "shadow": "rgba(0,0,0,.4)"
+ }
+}

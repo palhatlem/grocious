@@ -1,0 +1,23 @@
+{
+ "id": "ink",
+ "label": "Ink",
+ "scheme": "dark",
+ "colors": {
+  "bg": "#0b0c10",
+  "bg2": "#050608",
+  "card": "#12141a",
+  "card2": "#191c24",
+  "line": "#242833",
+  "fg": "#e6e8ee",
+  "mut": "#7d8494",
+  "accent": "#7aa2f7",
+  "accent-fg": "#0b0c10",
+  "pos": "#5fd08a",
+  "neg": "#e8735a",
+  "warn": "#e0af68",
+  "trumf": "#9b8cff",
+  "rema": "#4a90d9",
+  "coop": "#3fb68b",
+  "shadow": "rgba(0,0,0,.5)"
+ }
+}

@@ -1,0 +1,23 @@
+{
+ "id": "dark",
+ "label": "Mørk",
+ "scheme": "dark",
+ "colors": {
+  "bg": "#111217",
+  "bg2": "#0c0d11",
+  "card": "#181b1f",
+  "card2": "#1f2226",
+  "line": "#2c3235",
+  "fg": "#d8d9da",
+  "mut": "#8e9297",
+  "accent": "#5794f2",
+  "accent-fg": "#0b0d12",
+  "pos": "#73bf69",
+  "neg": "#f2495c",
+  "warn": "#ff9830",
+  "trumf": "#b39dff",
+  "rema": "#6cb0ff",
+  "coop": "#5fd08a",
+  "shadow": "rgba(0,0,0,.35)"
+ }
+}

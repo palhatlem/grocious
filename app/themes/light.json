@@ -1,0 +1,23 @@
+{
+ "id": "light",
+ "label": "Lys",
+ "scheme": "light",
+ "colors": {
+  "bg": "#f4f5f7",
+  "bg2": "#e9ebef",
+  "card": "#ffffff",
+  "card2": "#f0f2f5",
+  "line": "#d9dde3",
+  "fg": "#1b1f27",
+  "mut": "#6b7280",
+  "accent": "#2f6fed",
+  "accent-fg": "#ffffff",
+  "pos": "#178a4c",
+  "neg": "#c8382a",
+  "warn": "#b7791f",
+  "trumf": "#6c5ce7",
+  "rema": "#1f6fb2",
+  "coop": "#2a9d5c",
+  "shadow": "rgba(16,24,40,.08)"
+ }
+}
