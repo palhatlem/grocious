@@ -30,8 +30,15 @@ async def main():
         ph=await pg.query_selector('input[name="phoneNumber"]') or await pg.query_selector('input[type="tel"]')
         await ph.fill(PHONE)
         print("SUBMITTING_PHONE (triggers SMS)...", flush=True)
-        await click_any(pg, ["Send meg engangskode","Send","Logg inn","Neste"])
-        await pg.wait_for_timeout(5000); (await pg.screenshot(path="/work/discovery/rema_s2.png")) if False else None
+        clicked=await click_any(pg, ["Send meg engangskode","Send","Logg inn","Neste"])
+        print("CLICKED:", clicked, flush=True)
+        await pg.wait_for_timeout(5000)
+        try:
+            await pg.screenshot(path="/data/rema_login_page.png", full_page=True)
+            body=await pg.evaluate("document.body.innerText")
+            print("PAGE_TEXT:", " | ".join([l for l in body.splitlines() if l.strip()][:14]), flush=True)
+        except Exception as e:
+            print("DEBUG_DUMP_FAIL:", e, flush=True)
         print("SMS_SENT — waiting for code file (up to 6 min)...", flush=True)
         code=None
         for _ in range(120):

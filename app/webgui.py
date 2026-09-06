@@ -4,7 +4,7 @@ Bonus, offers/coupons (with manual activate), receipts + JSON/CSV/PDF export.
 Read-only except opt-in Rema offer activation. Behind tinyauth; binds 127.0.0.1."""
 import json, os, io, csv, re, uuid, datetime, functools
 import requests
-from flask import Flask, Response, render_template_string, redirect, abort
+from flask import Flask, Response, render_template_string, redirect, abort, request, jsonify
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
@@ -243,6 +243,58 @@ def trumf_receipt(bid, fmt):
 @app.route("/rema/receipt/<int:tid>.<fmt>")
 def rema_receipt(tid, fmt):
     return _download("rema", tid, fmt, rema_lines(tid), f"Rema 1000 — {tid}")
+
+# ---------------- machine API (agents / bookkeeping) ----------------
+@app.route("/api/summary")
+def api_summary():
+    return jsonify({"trumf": trumf_data(), "rema": rema_data()})
+
+def _month_receipts(ym, with_lines=False):
+    out = []
+    t, r = trumf_data(), rema_data()
+    if t.get("ok"):
+        for x in t["receipts"]:
+            if x["date"].startswith(ym):
+                rec = {"chain": "trumf", "id": str(x["id"]), "date": x["date"], "store": x["store"],
+                       "amount": x["amount"], "bonus": x.get("bonus") or 0, "discount": 0}
+                if with_lines and x.get("hasReceipt"):
+                    rec["lines"] = trumf_lines(x["id"])
+                out.append(rec)
+    if r.get("ok"):
+        for x in r["receipts"]:
+            if x["date"].startswith(ym):
+                rec = {"chain": "rema", "id": str(x["id"]), "date": x["date"][:10], "store": x["store"],
+                       "amount": x["amount"], "bonus": 0, "discount": x.get("discount") or 0}
+                if with_lines:
+                    rec["lines"] = rema_lines(int(x["id"]))
+                out.append(rec)
+    out.sort(key=lambda x: x["date"])
+    return out
+
+@app.route("/api/export/<ym>.<fmt>")
+def api_export(ym, fmt):
+    if not re.fullmatch(r"\d{4}-\d{2}", ym) or fmt not in ("json", "csv"):
+        abort(404)
+    with_lines = request.args.get("lines") == "1"
+    recs = _month_receipts(ym, with_lines)
+    if fmt == "json":
+        return jsonify({"month": ym, "count": len(recs),
+                        "total": round(sum(x["amount"] or 0 for x in recs), 2),
+                        "bonus": round(sum(x["bonus"] for x in recs), 2),
+                        "discount": round(sum(x["discount"] for x in recs), 2),
+                        "receipts": recs})
+    buf = io.StringIO(); w = csv.writer(buf)
+    if with_lines:
+        w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"])
+        for x in recs:
+            for l in x.get("lines", []):
+                w.writerow([x["chain"], x["id"], x["date"], x["store"], l["name"], l["ean"], l["qty"], l["amount"]])
+    else:
+        w.writerow(["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"])
+        for x in recs:
+            w.writerow([x["chain"], x["id"], x["date"], x["store"], x["amount"], x["bonus"], x["discount"]])
+    return Response(buf.getvalue(), mimetype="text/csv",
+                    headers={"Content-Disposition": f"attachment;filename=grocious-{ym}{'-lines' if with_lines else ''}.csv"})
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "3012")))
