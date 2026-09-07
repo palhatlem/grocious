@@ -9,3 +9,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+
+# Public brand assets only; other screenshots remain ignored.
+!app/static/brand/*.png

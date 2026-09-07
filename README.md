@@ -1,5 +1,7 @@
 # grocious
 
+<img src="app/static/brand/grocious-readme.png" alt="grocious" width="560">
+
 Your groceries. Your receipts. Your overview.
 
 Pull your loyalty **bonus balance, receipts and campaign offers** straight from the

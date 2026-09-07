@@ -127,3 +127,11 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .stat-more[open] > summary .caret { transform: rotate(90deg); }
 
 .metric-note { display: block; color: var(--mut); font-size: .7rem; font-weight: normal; white-space: normal; }
+
+/* Approved raster wordmark; mask follows the active theme foreground. */
+.brand { display: inline-flex; padding: 0; flex-shrink: 0; }
+.brand-logo { display: block; width: 180px; height: 64px; background: currentColor; -webkit-mask: url("/static/brand/grocious-wordmark.png") center / contain no-repeat; mask: url("/static/brand/grocious-wordmark.png") center / contain no-repeat; }
+@media (max-width: 480px) {
+  .brand-logo { width: 160px; height: 56px; }
+  .top .tagline { order: 3; flex-basis: 100%; }
+}
