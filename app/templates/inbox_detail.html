@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ r.store or 'Kvittering' }} · innboks · grocious{% endblock %}
+{% block content %}
+<p><a href="/inbox">← Innboks</a></p>
+<div class="inbox-review">
+<section class="panel"><h2>Original</h2>
+{% if images %}{% for d in images %}<a href="/inbox/{{ r.archive_id }}/file/{{ d.filename }}"><img class="receipt-img" alt="Kvitteringsbilde" src="/inbox/{{ r.archive_id }}/file/{{ d.filename }}"></a>{% endfor %}
+{% elif pdf %}<iframe title="Original PDF" class="inbox-pdf" src="/inbox/{{ r.archive_id }}/file/{{ pdf.filename }}"></iframe>
+{% else %}<pre class="inbox-text">{{ r.document_text or 'Ingen tekst hentet ut.' }}</pre>{% endif %}
+<ul>{% for d in r.documents %}<li><a href="/inbox/{{ r.archive_id }}/file/{{ d.filename }}">{{ d.role }} · {{ d.mimetype }}</a></li>{% endfor %}</ul>
+<p><a href="/inbox/{{ r.archive_id }}.json">JSON</a> · <a href="/inbox/{{ r.archive_id }}.csv">CSV</a> · <a href="/inbox/{{ r.archive_id }}.pdf">PDF</a> · <a href="/inbox/{{ r.archive_id }}.zip">Alle filer</a></p>
+</section>
+<section class="panel"><h1>{{ r.store or 'Gjennomgå kvittering' }}</h1><p>Status: {{ r.review.state }}</p>
+{% if r.validation.issues %}<p class="err">Kontroller: {{ r.validation.issues|join(', ') }}</p>{% endif %}
+<form method="post" action="/inbox/{{ r.archive_id }}/corrections" class="inbox-fields">
+<label>Butikk<input name="store" value="{{ r.store or '' }}"></label>
+<label>Dato<input type="date" name="date" value="{{ r.date or '' }}"></label>
+<label>Tid<input type="time" name="time" value="{{ r.time or '' }}"></label>
+<label>Totalbeløp<input name="amount" inputmode="decimal" value="{{ r.amount if r.amount is not none else '' }}"></label>
+<label>Valuta<input name="currency" value="{{ r.currency or '' }}" placeholder="NOK"></label>
+<label>Kategori<select name="category">{% for c in categories %}<option {{ 'selected' if r.category==c }}>{{ c }}</option>{% endfor %}</select></label>
+<label>Notat<textarea name="note">{{ r.note or '' }}</textarea></label>
+<div class="inbox-line-scroll"><table data-line-editor><thead><tr><th>Vare</th><th>Antall</th><th>Enhet</th><th>Beløp</th><th>Rabatt</th><th>Type</th><th></th></tr></thead><tbody></tbody></table></div>
+<input type="hidden" name="lines" id="lines-value" value="{{ lines_json }}"><button type="button" class="btn" id="add-line">Legg til vare</button>
+<script type="application/json" id="inbox-lines">{{ r.lines|tojson }}</script>
+<script src="/static/inbox.js" defer></script>
+<button class="btn">Lagre endringer</button></form>
+<p class="mut small">Endringer lagres separat fra originalen. Lagring setter kvitteringen tilbake til gjennomgang.</p>
+</section></div>
+<div class="inbox-actions">{% for state,label in [('confirmed','Bekreft'),('needs_review','Til gjennomgang'),('discarded','Forkast')] %}<form method="post" action="/inbox/{{ r.archive_id }}/state"><input type="hidden" name="state" value="{{ state }}"><button class="btn">{{ label }}</button></form>{% endfor %}</div>
+{% endblock %}

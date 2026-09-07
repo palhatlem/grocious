@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Innboks · grocious{% endblock %}
+{% block content %}
+<section class="panel">
+<h1>Innboks</h1><p>{{ counts.needs_review }} venter på gjennomgang · {{ counts.confirmed }} bekreftet</p>
+<form method="post" enctype="multipart/form-data" class="inbox-upload">
+<label>Last opp kvitteringer <input type="file" name="files" multiple accept="image/*,application/pdf,.eml,.html,.txt" required></label>
+<button class="btn">Last opp</button></form>
+<form method="post" enctype="multipart/form-data" class="inbox-upload">
+<label>Ta bilde <input type="file" name="files" accept="image/*" capture="environment" required></label><button class="btn">Send bilde</button></form>
+<p class="mut small">Maks. 32 MB per fil, 10 filer. Originalene bevares. Bilder kan trenge tolkning eller manuell utfylling.</p>
+<nav class="chips">{% for value,label in [('needs_review','Til gjennomgang'),('confirmed','Bekreftet'),('linked','Koblet'),('discarded','Forkastet'),('all','Alle')] %}<a class="chip {{ 'on' if state==value }}" href="/inbox?state={{ value }}">{{ label }}</a>{% endfor %}</nav>
+</section>
+<section class="panel"><ul class="inbox-rows">{% for r in rows %}<li><a href="/inbox/{{ r.archive_id }}">{{ r.store or r.intake.filename }} · {{ r.date or 'Ukjent dato' }} · {{ r.amount|nok(2) }}</a> <span class="mut">{{ r.category }} · {{ r.review.state }}</span></li>{% else %}<li>Ingen kvitteringer her ennå.</li>{% endfor %}</ul></section>
+{% endblock %}

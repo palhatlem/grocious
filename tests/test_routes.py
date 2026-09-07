@@ -54,7 +54,7 @@ def test_new_theme_file_is_picked_up(client, tmp_path, monkeypatch):
 
 def test_api_summary_shape_unchanged(client):
     d = client.get("/api/summary").get_json()
-    assert set(d) == {"trumf", "rema", "coop"}
+    assert set(d) == {"trumf", "rema", "coop", "inbox"}
     assert d["trumf"]["ok"] and set(d["trumf"]) >= {"saldo", "akkumulert", "oppdatert", "count", "receipts", "offers"}
     assert set(d["trumf"]["receipts"][0]) == {"id", "date", "store", "amount", "bonus", "chain", "hasReceipt"}
     assert set(d["rema"]) >= {"purchaseTotal", "discountTotal", "count", "receipts", "offers"}
@@ -64,7 +64,7 @@ def test_api_summary_shape_unchanged(client):
 
 def test_api_export_json_and_csv(client):
     d = client.get("/api/export/2026-06.json").get_json()
-    assert set(d) == {"month", "count", "total", "bonus", "discount", "receipts"} and d["count"] > 0
+    assert set(d) == {"month", "count", "total", "total_currency", "bonus", "discount", "receipts"} and d["count"] > 0
     assert all(x["date"].startswith("2026-06") for x in d["receipts"])
     assert set(d["receipts"][0]) == {"chain", "id", "date", "store", "amount", "bonus", "discount"}
     with_lines = client.get("/api/export/2026-06.json?lines=1").get_json()

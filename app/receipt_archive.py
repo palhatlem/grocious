@@ -3,7 +3,7 @@ import csv, datetime as dt, hashlib, io, json, os, re, tempfile
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
-SOURCES = {'coop', 'rema', 'trumf'}
+SOURCES = {'coop', 'rema', 'trumf', 'inbox'}
 
 def root():
     return Path(os.environ.get('GROCERY_DATA', '/data')) / 'receipts'
@@ -97,7 +97,12 @@ def normalize_coop(head, detail, year, month, pdf_text):
       'archived_at':dt.datetime.now(dt.timezone.utc).isoformat()}
 
 def read_receipt(source,rid):
-    return json.loads((folder(source,rid)/'receipt.json').read_text())
+    directory = folder(source,rid)
+    record = json.loads((directory/'receipt.json').read_text())
+    if source == 'inbox':
+        from inbox.store import overlay
+        record = overlay(record, directory)
+    return record
 
 def summary(source):
     if source not in SOURCES:raise ValueError('Unknown source')
@@ -112,8 +117,8 @@ def summary(source):
 def rebuild(source):
     records=[]
     for p in (root()/source).glob('*/receipt.json'):
-        r=json.loads(p.read_text())
-        records.append({k:r.get(k) for k in ('archive_id','id','date','time','store','amount','bonus','discount','receipt_id','validation','documents')})
+        r=read_receipt(source,p.parent.name)
+        records.append({k:r.get(k) for k in ('archive_id','id','date','time','store','amount','bonus','discount','receipt_id','validation','documents','amount_minor','currency','category','chain','review','intake','linked_to')})
     records.sort(key=lambda x:(x['date'] or '',x['time'] or '',x['id']),reverse=True)
     atomic_json(root()/source/'index.json',{'ok':True,'count':len(records),'receipts':records})
     return len(records)

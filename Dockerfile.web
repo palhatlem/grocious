@@ -1,6 +1,7 @@
 # grocery web GUI (Trumf + Rema + Coop archive dashboard, receipt export)
 FROM python:3.12-slim
-RUN pip install --no-cache-dir flask requests reportlab waitress
+RUN apt-get update && apt-get install -y --no-install-recommends poppler-utils && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir flask requests reportlab waitress pillow pillow-heif html2text
 COPY app/ /app/
 WORKDIR /app
 ENV PORT=3012 GROCERY_DATA=/data

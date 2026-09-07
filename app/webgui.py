@@ -6,6 +6,8 @@ import json, os, io, csv, re, uuid, datetime, functools
 import requests
 from flask import Flask, Response, render_template, redirect, abort, request, jsonify, send_file
 import receipt_archive
+from inbox import store as inbox_store
+from inbox.routes import bp as inbox_bp
 import demo, themes, ui, dashboard_stats, bonus_sources
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
@@ -136,13 +138,12 @@ def rema_data():
         H = rema_headers()
         heads = requests.get("https://api.rema.no/v1/bella/transaction/v2/heads", headers=H, timeout=30).json()
         offers = requests.get("https://api.rema.no/v1/bella/offers/v2/available-offers/", headers=H, timeout=20).json()
-        balance = accumulated = None
+        balance = None
         try:
             profile = requests.get("https://api.rema.no/bella/v2/customers", headers=H, timeout=15)
             profile.raise_for_status(); profile = profile.json()
             if profile.get("currencyCode") == "NOK" and not profile.get("member", {}).get("spennUser"):
                 balance = profile.get("member", {}).get("bonusBalanceDecimal")
-                accumulated = profile.get("member", {}).get("accBonusBalanceDecimal")
         except (requests.RequestException, ValueError, AttributeError):
             pass
         olist = offers if isinstance(offers, list) else offers.get("offers", [])
@@ -230,7 +231,7 @@ def rema_receipt(tid, fmt):
 # ---------------- machine API (agents / bookkeeping) ----------------
 @app.route("/api/summary")
 def api_summary():
-    return jsonify({"trumf": trumf_data(), "rema": rema_data(), "coop": coop_dashboard()})
+    return jsonify({"trumf": trumf_data(), "rema": rema_data(), "coop": coop_dashboard(), "inbox": inbox_store.summary()})
 
 @app.route('/api/coop/status')
 def coop_status():
@@ -286,6 +287,7 @@ def _month_receipts(ym, with_lines=False):
                 # Existing combined totals require numbers; the source value stays explicit.
                 rec['bonus']=full.get('bonus') or 0;rec['discount']=full.get('discount') or 0
             out.append(rec)
+    out.extend(inbox_store.exports(ym, with_lines))
     out.sort(key=lambda x: x["date"])
     return out
 
@@ -297,10 +299,10 @@ def api_export(ym, fmt):
     recs = _month_receipts(ym, with_lines)
     if fmt == "json":
         return jsonify({"month": ym, "count": len(recs),
-                        "total": round(sum(x["amount"] or 0 for x in recs), 2),
+                        "total": round(sum((x["amount"] or 0) for x in recs if x.get("currency", "NOK") == "NOK"), 2),
                         "bonus": round(sum(x["bonus"] for x in recs), 2),
                         "discount": round(sum(x["discount"] for x in recs), 2),
-                        "receipts": recs})
+                        "total_currency": "NOK", "receipts": recs})
     buf = io.StringIO(); w = csv.writer(buf)
     if with_lines:
         w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"])
@@ -314,8 +316,6 @@ def api_export(ym, fmt):
     return Response(buf.getvalue(), mimetype="text/csv",
                     headers={"Content-Disposition": f"attachment;filename=grocious-{ym}{'-lines' if with_lines else ''}.csv"})
 
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "3012")))
 
 
 # Independent archive routes preserve existing download contracts.
@@ -362,3 +362,10 @@ def archived_file(source,rid,filename):
     try:path,doc=receipt_archive.document(source,rid,filename)
     except (ValueError,FileNotFoundError):abort(404)
     return send_file(path,mimetype=doc['mimetype'],as_attachment=not doc['mimetype'].startswith('image/'),download_name=filename)
+
+
+app.config["MAX_CONTENT_LENGTH"] = 321 * 1024 * 1024
+app.register_blueprint(inbox_bp)
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", "3012")))
