@@ -107,3 +107,40 @@ def test_pwa(client):
     assert response.json["share_target"]["action"] == "/inbox"
     assert {i["sizes"] for i in response.json["icons"]} == {"192x192", "512x512"}
     assert b"caches." not in client.get("/sw.js").data
+
+
+def test_interpretations(client, inbox_data, monkeypatch):
+    from inbox import llm
+    import copy
+    import json
+
+    for key in ("OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GROCIOUS_LLM_LITELLM_URL"):
+        monkeypatch.delenv(key, raising=False)
+    assert [p["id"] for p in llm.providers() if p["available"]] == ["none"]
+    rid = store.ingest(b"KIWI Test\n07.09.2026\nTOTALT 42,00 NOK")["rid"]
+    original = (archive.folder("inbox", rid) / "receipt.json").read_bytes()
+
+    class Fake:
+        id, label, vision, available, model = "fake", "Fake", False, True, "fixture"
+
+        def interpret(self, **kwargs):
+            parsed = {k: None for k in llm.SCHEMA["properties"]}
+            parsed.update(store="KIWI Test", total=99.0, currency="NOK", date="2026-09-07")
+            return dict(parsed=copy.deepcopy(parsed), raw={"parsed": parsed}, input_tokens=1, output_tokens=2)
+
+    monkeypatch.setitem(llm.REGISTRY, "fake", Fake())
+    response = client.post(f"/inbox/{rid}/interpret", json={"provider": "fake"})
+    assert response.status_code == 200, response.json
+    assert "llm_total_not_in_text" in archive.read_receipt("inbox", rid)["validation"]["issues"]
+    store.correct(rid, {"note": "Check"})
+    assert "llm_total_not_in_text" in archive.read_receipt("inbox", rid)["validation"]["issues"]
+    llm.run(rid, "none")
+    assert len(llm.history(rid)) == 2
+    assert archive.read_receipt("inbox", rid)["amount_minor"] == 4200
+    llm.select(rid, 1)
+    assert archive.read_receipt("inbox", rid)["amount_minor"] == 9900
+    assert (archive.folder("inbox", rid) / "receipt.json").read_bytes() == original
+    assert (
+        json.loads((archive.folder("inbox", rid) / "interpretation-1.json").read_text())["request"]["image_sha256"]
+        == []
+    )

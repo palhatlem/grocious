@@ -1,0 +1,211 @@
+{
+  "type": "object",
+  "properties": {
+    "store": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "chain": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "time": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currency": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "payment": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "receipt_number": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "category": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "total": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "lines": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "qty": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "amount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "discount": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "unit",
+          "kind",
+          "qty",
+          "amount",
+          "discount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "vat": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "object",
+        "properties": {
+          "rate": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "base": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "tax": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rate",
+          "base",
+          "tax"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "confidence": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "store": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "date": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "total": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "lines": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "store",
+        "date",
+        "total",
+        "lines"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "store",
+    "chain",
+    "date",
+    "time",
+    "currency",
+    "payment",
+    "receipt_number",
+    "category",
+    "notes",
+    "total",
+    "lines",
+    "vat",
+    "confidence"
+  ],
+  "additionalProperties": false
+}

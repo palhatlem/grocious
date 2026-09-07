@@ -6,7 +6,7 @@ from flask import Blueprint, abort, jsonify, redirect, render_template, request,
 from werkzeug.exceptions import RequestEntityTooLarge
 import receipt_archive as archive
 import themes
-from . import store
+from . import store, llm
 from .extract import MAX_BYTES
 from .heuristics import CATEGORIES
 
@@ -27,7 +27,7 @@ def record(rid):
 def context():
     import webgui
 
-    return dict(themes=themes.load_themes(), demo=webgui.DEMO, categories=CATEGORIES)
+    return dict(themes=themes.load_themes(), demo=webgui.DEMO, categories=CATEGORIES, providers=llm.providers())
 
 
 @bp.errorhandler(ValueError)
@@ -94,6 +94,7 @@ def detail(rid):
         images=images,
         pdf=pdf,
         lines_json=json.dumps(r["lines"], ensure_ascii=False),
+        runs=llm.history(rid),
         **context(),
     )
 
@@ -194,3 +195,16 @@ def worker_script():
     response.headers["Cache-Control"] = "no-cache"
     response.headers["Service-Worker-Allowed"] = "/"
     return response
+
+
+@bp.post("/inbox/<rid>/interpret")
+def interpret(rid):
+    record(rid)
+    values = request.get_json() if request.is_json else request.form
+    if not isinstance(values, dict) and not hasattr(values, "get"):
+        raise ValueError("Ugyldig tolkevalg")
+    if values.get("run"):
+        llm.select(rid, values["run"])
+    else:
+        llm.run(rid, values.get("provider", "none"))
+    return jsonify(record(rid)) if wants_json() else redirect("/inbox/" + rid, 303)

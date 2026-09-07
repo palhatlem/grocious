@@ -101,10 +101,18 @@ def overlay(record, directory):
         data = json.loads(review.read_text())
         record["review"], record["linked_to"] = data["review"], data.get("linked_to")
     record["validation"] = validate(record)
-    if active.exists() and record.get("document_text") and not corrections.exists():
+    if active.exists() and record["interpretation"].get("provider") != "none" and record.get("document_text"):
+        corrected = json.loads(corrections.read_text()) if corrections.exists() else {}
+        if "amount_minor" in corrected:
+            return record
         import re
 
-        values = {money(v) for v in re.findall(r"-?\d[\d .]*[,.]\d{2}", record["document_text"])}
+        values = set()
+        for v in re.findall(r"(?<![\d.])-?\d[\d ]*[,.]\d{2}(?![\d.])", record["document_text"]):
+            try:
+                values.add(money(v))
+            except ValueError:
+                pass
         if record.get("amount_minor") is not None and record["amount_minor"] not in values:
             record["validation"]["issues"].append("llm_total_not_in_text")
     return record
@@ -188,6 +196,18 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
         if children:
             with locked():
                 archive.atomic_json(directory / "children.json", children)
+    import os
+
+    if not duplicate and os.getenv("GROCIOUS_LLM_AUTO", "0") == "1":
+        from . import llm
+
+        chosen = os.getenv("GROCIOUS_LLM_DEFAULT", "none")
+        if chosen != "none":
+            try:
+                llm.run(rid, chosen)
+            except ValueError:
+                # Intake remains durable even when an optional provider is down.
+                archive.atomic_json(directory / "interpretation-error.json", {"at": now(), "error": "provider_failed"})
     return dict(
         rid=rid,
         state=archive.read_receipt("inbox", rid)["review"]["state"],
@@ -265,7 +285,13 @@ def summary():
         s: sum(r.get("review", {}).get("state") == s for r in rows)
         for s in ("needs_review", "confirmed", "discarded", "linked")
     }
+    from .llm import providers
+
     return dict(
+        providers=providers(),
+        mail=json.loads((archive.root() / "inbox" / "mail_status.json").read_text())
+        if (archive.root() / "inbox" / "mail_status.json").exists()
+        else {"connected": False},
         count=len(rows),
         **counts,
         last_ingest=max((r.get("intake", {}).get("received_at", "") for r in rows), default=None),
