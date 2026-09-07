@@ -225,6 +225,10 @@ def offer_detail(source, oid):
         abort(404)
     return render_template("offer_detail.html", o=offer, demo=DEMO, themes=themes.load_themes())
 
+@app.get("/favicon.ico")
+def favicon():
+    return send_file(os.path.join(app.static_folder, "brand", "favicon.ico"), mimetype="image/vnd.microsoft.icon")
+
 @app.route("/themes.css")
 def themes_css():
     return Response(themes.render_css(), mimetype="text/css", headers={"Cache-Control": "public, max-age=300"})

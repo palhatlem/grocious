@@ -8,16 +8,28 @@
   "theme_color": "#1d2021",
   "icons": [
     {
-      "src": "/static/brand/grocious-pwa-192.png",
+      "src": "/static/brand/grocious-pwa-192.png?v=2",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/static/brand/grocious-pwa-512.png",
+      "src": "/static/brand/grocious-pwa-512.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/static/brand/grocious-maskable-192.png?v=2",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/brand/grocious-maskable-512.png?v=2",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "share_target": {
