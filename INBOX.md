@@ -71,10 +71,19 @@ is the worker's connection contract.
 SHA-256 checked. Review and corrections are separate overlays. Duplicate uploads reuse the same ID.
 Shared URLs are stored as inert text and never fetched by the server. HTML and email render as plain text.
 
-Linking copies the original into the provider receipt as `user-upload`. The target's independent
+Linking copies originals into a chosen provider or inbox receipt as `user-upload`. The target's independent
 `user-uploads.json` is merged on read so a subsequent provider sync cannot erase the attachment/reference.
 No provider amounts or receipt lines are changed. Linked receipts cannot be edited or reconfirmed into a
-second export. There is currently no unlink UI.
+second export. Inbox-to-inbox linking keeps the chosen primary's review state, amount and lines;
+it does not confirm a pending primary or merge parsed fields. Both originals remain accessible from
+the primary and its ZIP download. Parent email/attachment relationships appear as candidates even
+without parsed amounts; matching dates/amounts also suggest candidates. Suggestions never link automatically.
+The review page warns when both inbox candidates are already confirmed and lets the user choose the
+direction. Self-links, linked/discarded targets and moving a primary that already has linked documents
+are rejected. There is currently no unlink UI.
+
+Email intake still creates separate attachment candidates. A single email may contain several purchases;
+grouped intake with selectable interpretation sources and a split action is not implemented yet.
 
 `/api/export/<ym>.json` and CSV include pending/confirmed inbox records, with review state, confidence,
 category, currency and archive ID; discarded and linked inbox records are excluded. CSV appends these

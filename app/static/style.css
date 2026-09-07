@@ -151,3 +151,5 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .inbox-thumb{width:44px;height:60px;object-fit:contain;vertical-align:middle;margin-right:.6rem}.inbox-rows li{padding:.65rem 0}
 
 .btn:disabled{opacity:.4;cursor:not-allowed}.inbox-review .chips{gap:.4rem;flex-wrap:wrap}.inbox-review .chips form{flex:1}
+
+.inbox-candidate{padding:.8rem 0;border-top:1px solid var(--line);overflow-wrap:anywhere}.inbox-candidate form{margin:.5rem 0}.inbox-candidate button{white-space:normal}

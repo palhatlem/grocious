@@ -11,47 +11,80 @@ from . import store
 
 def candidates(rid):
     r = archive.read_receipt("inbox", rid)
-    if not r.get("date"):
-        return []
-    date = dt.date.fromisoformat(r["date"])
+    date = dt.date.fromisoformat(r["date"]) if r.get("date") else None
     normalized = lambda s: re.sub(r"\W+", "", (s or "").casefold())
     result = []
-    for source in sorted(archive.SOURCES - {"inbox"}):
+    parent = r.get("intake", {}).get("parent")
+    for source in sorted(archive.SOURCES):
         for candidate in archive.summary(source)["receipts"]:
+            related = False
+            if source == "inbox":
+                if candidate["archive_id"] == rid:
+                    continue
+                # Read current review overlays; an index can lag behind a link/discard.
+                candidate = archive.read_receipt("inbox", candidate["archive_id"])
+                if candidate.get("review", {}).get("state") in ("linked", "discarded"):
+                    continue
+                other_parent = candidate.get("intake", {}).get("parent")
+                related = candidate["archive_id"] == parent or other_parent == rid
             try:
-                days = abs((dt.date.fromisoformat(candidate["date"]) - date).days)
+                days = abs((dt.date.fromisoformat(candidate["date"]) - date).days) if date else None
             except (ValueError, TypeError):
-                continue
+                days = None
             n = candidate.get("amount_minor")
             if n is None:
                 n = archive.minor(candidate.get("amount"))
             exact = (
-                days <= 1
+                days is not None
+                and days <= 1
                 and n is not None
                 and n == r.get("amount_minor")
                 and candidate.get("currency", "NOK") == r.get("currency")
             )
             same_store = (
-                days == 0 and bool(r.get("store")) and normalized(r["store"]) == normalized(candidate.get("store"))
+                days == 0
+                and bool(r.get("store"))
+                and normalized(r["store"]) == normalized(candidate.get("store"))
+                and candidate.get("currency", "NOK") == r.get("currency")
             )
-            if exact or same_store:
+            siblings = source == "inbox" and bool(parent) and candidate.get("intake", {}).get("parent") == parent
+            if related or exact or same_store:
+                reason = (
+                    "E-post og vedlegg"
+                    if related
+                    else "Vedlegg fra samme e-post"
+                    if siblings
+                    else "Samme beløp og dato ± én dag"
+                    if exact
+                    else "Samme butikk og dato"
+                )
                 result.append(
                     {
                         **candidate,
                         "source": source,
                         "exact": exact,
-                        "reason": "Samme beløp og dato ± én dag" if exact else "Samme butikk og dato",
+                        "related": related or siblings,
+                        "reason": reason + (" · samme beløp og valuta" if related and exact else ""),
+                        "url": "/inbox/" + candidate["archive_id"]
+                        if source == "inbox"
+                        else "/archive/" + source + "/" + candidate["archive_id"],
                     }
                 )
-    return result
+    return sorted(result, key=lambda c: (not c["related"], not c["exact"]))
 
 
 def link(rid, source, target):
-    if not isinstance(source, str) or not isinstance(target, str) or source not in archive.SOURCES - {"inbox"}:
-        raise ValueError("Velg en kjedekvittering")
+    if not isinstance(source, str) or not isinstance(target, str) or source not in archive.SOURCES:
+        raise ValueError("Velg en kvittering som hovedpost")
     with store.locked():
         r = archive.read_receipt("inbox", rid)
-        archive.read_receipt(source, target)
+        primary = archive.read_receipt(source, target)
+        if source == "inbox" and target == rid:
+            raise ValueError("En kvittering kan ikke kobles til seg selv")
+        if source == "inbox" and primary.get("review", {}).get("state") in ("linked", "discarded"):
+            raise ValueError("Velg en hovedpost som ikke er koblet eller forkastet")
+        if r.get("linked_from"):
+            raise ValueError("Denne hovedposten har allerede koblede bilag. Behold den som hovedpost.")
         if r.get("linked_to") and r["linked_to"] != {"source": source, "archive_id": target}:
             raise ValueError("Kvitteringen er allerede koblet til en annen original")
         directory = archive.folder(source, target)
@@ -81,5 +114,6 @@ def link(rid, source, target):
                 "linked_to": {"source": source, "archive_id": target},
             },
         )
-        archive.rebuild(source)
+        if source != "inbox":
+            archive.rebuild(source)
         archive.rebuild("inbox")

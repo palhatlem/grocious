@@ -255,7 +255,8 @@ def candidates(rid):
 def link(rid):
     record(rid)
     linking.link(rid, request.form.get("source"), request.form.get("target"))
-    return redirect("/inbox/" + rid, 303)
+    source, target = request.form.get("source"), request.form.get("target")
+    return redirect("/inbox/" + target if source == "inbox" else "/archive/" + source + "/" + target, 303)
 
 
 @bp.get("/inbox/<rid>/thumbnail")
