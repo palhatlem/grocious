@@ -64,9 +64,23 @@ def test_api_summary_shape_unchanged(client):
 
 def test_api_export_json_and_csv(client):
     d = client.get("/api/export/2026-06.json").get_json()
-    assert set(d) == {"month", "count", "total", "total_currency", "bonus", "discount", "receipts"} and d["count"] > 0
+    assert (
+        set(d) == {"month", "count", "total", "total_currency", "total_minor", "bonus", "discount", "receipts"}
+        and d["count"] > 0
+    )
     assert all(x["date"].startswith("2026-06") for x in d["receipts"])
-    assert set(d["receipts"][0]) == {"chain", "id", "date", "store", "amount", "bonus", "discount"}
+    assert set(d["receipts"][0]) == {
+        "chain",
+        "id",
+        "date",
+        "store",
+        "amount",
+        "amount_minor",
+        "payment",
+        "currency",
+        "bonus",
+        "discount",
+    }
     with_lines = client.get("/api/export/2026-06.json?lines=1").get_json()
     assert all("lines" in x for x in with_lines["receipts"] if x["chain"] == "rema")
     r = client.get("/api/export/2026-06.csv")

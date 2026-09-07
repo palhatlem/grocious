@@ -3,6 +3,7 @@
 import datetime as dt
 import re
 from decimal import Decimal
+from .payment import parse as parse_payment
 
 CATEGORIES = ("mat", "alkohol", "apotek", "husholdning", "restaurant", "transport", "annet", "ukjent")
 STORES = {
@@ -53,7 +54,7 @@ def parse(text, received_at=None):
         total=None,
         lines=[],
         vat=[],
-        payment=None,
+        payment=parse_payment(text),
         receipt_number=None,
         category="ukjent",
         notes=None,

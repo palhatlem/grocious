@@ -123,7 +123,7 @@ def rebuild(source):
     records=[]
     for p in (root()/source).glob('*/receipt.json'):
         r=read_receipt(source,p.parent.name)
-        records.append({k:r.get(k) for k in ('archive_id','id','date','time','store','amount','bonus','discount','receipt_id','validation','documents','amount_minor','currency','category','chain','review','intake','linked_to')})
+        records.append({k:r.get(k) for k in ('archive_id','id','date','time','store','amount','bonus','discount','receipt_id','validation','documents','amount_minor','currency','category','chain','review','intake','linked_to','payment')})
     records.sort(key=lambda x:(x['date'] or '',x['time'] or '',x['id']),reverse=True)
     atomic_json(root()/source/'index.json',{'ok':True,'count':len(records),'receipts':records})
     return len(records)

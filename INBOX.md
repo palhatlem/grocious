@@ -80,3 +80,18 @@ Demo mode seeds five synthetic inbox receipts on the first inbox visit. Run demo
 Release acceptance still requires the deployed proxy/PWA on a phone, live Bridge delivery, and one real
 photo run with each configured vision provider. Those are separate from local tests. Optional OCR and
 a dedicated icon design are deferred.
+
+## Bookkeeping contract additions
+
+`payment` is a nullable object with `method`, `card_last4`, `terminal`, `auth_code`, also indexed and
+exported. Unknown references remain null; no bank account is inferred. Only explicitly printed masked
+card suffixes are extracted by rules. Structured payment is included in prompt `interpret-v2`; v1 is
+retained for reproducibility. Category remains a UI hint, and never filters an export or selects an account.
+
+All four sources export integer `amount_minor`; line exports also include integer `amount_minor`
+(`line_amount_minor` in CSV) and available `kind`. Old numeric `amount` columns remain for compatibility.
+Archived integer amounts take precedence; without one, legacy chain amounts are converted with Decimal,
+so this cannot recover precision already lost upstream. `total_minor` is an integer NOK total.
+An endpoint regression test excludes linked/discarded rows in both JSON and CSV, including when the
+index is stale but the current review overlay has changed. `/api/archive/inbox` keeps the shared archive
+response shape with document checksums and roles.

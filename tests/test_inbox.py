@@ -245,3 +245,71 @@ def test_sdk_requests_only_receipt_context(inbox_data, monkeypatch):
     llm.Claude().interpret(text="synthetic", image=[(b"image", "image/jpeg")], mimetype=None, hints={})
     assert create.call_args.kwargs["output_config"]["format"]["schema"] == llm.SCHEMA
     assert create.call_args.kwargs["messages"][0]["content"][1]["source"]["media_type"] == "image/jpeg"
+
+
+def test_payment_in_archive_index_and_exports(client, inbox_data):
+    import csv
+
+    receipt = (
+        b"KIWI Test\n07.09.2026\nMelk 42,10\nTOTALT 42,10 NOK\nVisa\n"
+        b"Kort: ************1234\nTerminal: 5678\nAuth: 009900"
+    )
+    rid = store.ingest(receipt)["rid"]
+    expected = dict(method="Visa", card_last4="1234", terminal="5678", auth_code="009900")
+    assert archive.read_receipt("inbox", rid)["payment"] == expected
+    index = client.get("/api/archive/inbox").json
+    assert index["count"] == 1
+    assert index["receipts"][0]["payment"] == expected
+    assert index["receipts"][0]["documents"][0]["sha256"]
+    response = client.get("/api/export/2026-09.json?lines=1").json
+    row = next(r for r in response["receipts"] if r.get("archive_id") == rid)
+    assert row["payment"] == expected
+    assert row["amount_minor"] == 4210 and isinstance(row["amount_minor"], int)
+    assert row["lines"][0]["amount_minor"] == 4210
+    rows = list(csv.DictReader(io.StringIO(client.get("/api/export/2026-09.csv").text)))
+    assert next(r for r in rows if r["archive_id"] == rid)["amount_minor"] == "4210"
+    store.correct(rid, {"payment": {**expected, "card_last4": "5678"}})
+    assert archive.read_receipt("inbox", rid)["payment"]["card_last4"] == "5678"
+    with pytest.raises(ValueError):
+        store.correct(rid, {"payment": {"card_last4": "1234567812345678"}})
+    assert parse("Org.nr 123456789\nTOTALT 12,34 NOK")["payment"]["card_last4"] is None
+
+
+@pytest.mark.parametrize("review_state", ["linked", "discarded"])
+@pytest.mark.parametrize("fmt", ["json", "csv"])
+def test_export_never_includes_linked_or_discarded(client, inbox_data, review_state, fmt):
+    from inbox import linking
+
+    rid = store.ingest(b"KIWI Test\n07.09.2026\nMelk 42,00\nTOTALT 42,00 NOK")["rid"]
+    stale_index = archive.summary("inbox")
+    if review_state == "linked":
+        target = archive.key("coop", "synthetic-target")
+        raw = dict(
+            archive.read_receipt("inbox", rid), archive_id=target, id="synthetic-target", chain="coop", documents=[]
+        )
+        archive.atomic_json(archive.folder("coop", target) / "receipt.json", raw)
+        archive.rebuild("coop")
+        linking.link(rid, "coop", target)
+    else:
+        store.state(rid, review_state)
+    # Simulate a concurrent reader holding the index from before the overlay changed.
+    archive.atomic_json(archive.root() / "inbox" / "index.json", stale_index)
+    for suffix in ("", "?lines=1"):
+        response = client.get(f"/api/export/2026-09.{fmt}" + suffix)
+        assert response.status_code == 200
+        if fmt == "json":
+            assert all(row.get("archive_id") != rid for row in response.json["receipts"])
+        else:
+            import csv
+
+            assert all(row["archive_id"] != rid for row in csv.DictReader(io.StringIO(response.text)))
+
+
+def test_chain_export_has_integer_amounts(client, inbox_data):
+    response = client.get("/api/export/2026-06.json?lines=1").json
+    assert response["receipts"]
+    for r in response["receipts"]:
+        assert isinstance(r["amount_minor"], int)
+        for line in r.get("lines", []):
+            assert line["amount_minor"] is None or isinstance(line["amount_minor"], int)
+    assert response["total_minor"] == sum(r["amount_minor"] for r in response["receipts"])

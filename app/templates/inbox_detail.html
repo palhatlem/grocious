@@ -27,6 +27,7 @@
 <label>Totalbeløp<input name="amount" inputmode="decimal" value="{{ r.amount if r.amount is not none else '' }}"></label>
 <label>Valuta<input name="currency" value="{{ r.currency or '' }}" placeholder="NOK"></label>
 <label>Kategori<select name="category">{% for c in categories %}<option {{ 'selected' if r.category==c }}>{{ c }}</option>{% endfor %}</select></label>
+<details><summary>Betaling</summary>{% for field,label in [('method','Betalingsmåte'),('card_last4','Kortets siste fire siffer'),('terminal','Terminal'),('auth_code','Autorisasjonskode')] %}<label>{{ label }}<input name="payment_{{ field }}" value="{{ r.payment.get(field) or '' if r.payment is mapping else '' }}" {% if field=='card_last4' %}maxlength="4" pattern="[0-9]{4}" inputmode="numeric"{% endif %}></label>{% endfor %}</details>
 <label>Notat<textarea name="note">{{ r.note or '' }}</textarea></label>
 <div class="inbox-line-scroll"><table data-line-editor><thead><tr><th>Vare</th><th>Antall</th><th>Enhet</th><th>Beløp</th><th>Rabatt</th><th>Type</th><th></th></tr></thead><tbody></tbody></table></div>
 <input type="hidden" name="lines" id="lines-value" value="{{ lines_json }}"><button type="button" class="btn" id="add-line">Legg til vare</button>

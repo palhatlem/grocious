@@ -126,6 +126,10 @@ def corrections(rid):
     values = request.get_json() if request.is_json else request.form.to_dict()
     if not isinstance(values, dict):
         raise ValueError("Ugyldige korrigeringer")
+    if not request.is_json:
+        keys = ("method", "card_last4", "terminal", "auth_code")
+        if any("payment_" + k in values for k in keys):
+            values["payment"] = {k: values.pop("payment_" + k, "").strip() or None for k in keys}
     if isinstance(values.get("lines"), str):
         try:
             values["lines"] = json.loads(values["lines"])

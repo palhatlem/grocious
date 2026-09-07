@@ -9,6 +9,7 @@ from pathlib import Path
 
 import receipt_archive as archive
 from .extract import extract
+from .payment import normalize as normalize_payment
 from .heuristics import CATEGORIES, money, parse
 
 
@@ -58,7 +59,7 @@ def normalize(parsed):
         tax=parsed.get("vat") or [],
         category=parsed.get("category") or "ukjent",
         receipt_number=parsed.get("receipt_number"),
-        payment=parsed.get("payment"),
+        payment=normalize_payment(parsed.get("payment")),
     )
 
 
@@ -220,7 +221,7 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
 def correct(rid, edits):
     if not isinstance(edits, dict):
         raise ValueError("Ugyldige korrigeringer")
-    allowed = {"store", "date", "time", "amount", "category", "currency", "lines", "note"}
+    allowed = {"store", "date", "time", "amount", "category", "currency", "lines", "note", "payment"}
     if set(edits) - allowed:
         raise ValueError("Ukjent korrigeringsfelt")
     values = dict(edits)
@@ -241,6 +242,8 @@ def correct(rid, edits):
         raise ValueError("Ukjent kategori")
     if values.get("currency") and values["currency"] not in ("NOK", "SEK", "DKK", "EUR", "USD", "GBP"):
         raise ValueError("Ugyldig valuta")
+    if "payment" in values:
+        values["payment"] = normalize_payment(values["payment"])
     if "amount" in values:
         values["amount_minor"] = money(values["amount"])
         values["amount"] = None if values["amount_minor"] is None else values["amount_minor"] / 100
@@ -322,6 +325,9 @@ def exports(ym, with_lines=False):
             "linked",
         ):
             r = archive.read_receipt("inbox", item["archive_id"])
+            # The index can be older than the review overlay during another worker's write.
+            if r.get("review", {}).get("state") in ("linked", "discarded"):
+                continue
             out = {
                 k: r.get(k)
                 for k in (
@@ -335,6 +341,7 @@ def exports(ym, with_lines=False):
                     "currency",
                     "category",
                     "linked_to",
+                    "payment",
                 )
             }
             out.update(

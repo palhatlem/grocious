@@ -287,6 +287,23 @@ def _month_receipts(ym, with_lines=False):
                 # Existing combined totals require numbers; the source value stays explicit.
                 rec['bonus']=full.get('bonus') or 0;rec['discount']=full.get('discount') or 0
             out.append(rec)
+    # Add integer money and available archive metadata without changing legacy amount fields.
+    for rec in out:
+        source = rec['chain']
+        rid = rec.get('archive_id') or receipt_archive.key(source, rec['id'])
+        try:
+            archived = receipt_archive.read_receipt(source, rid)
+        except FileNotFoundError:
+            archived = {}
+        rec['amount_minor'] = archived.get('amount_minor')
+        if rec['amount_minor'] is None:
+            rec['amount_minor'] = receipt_archive.minor(rec.get('amount'))
+        rec['payment'] = archived.get('payment')
+        rec['currency'] = archived.get('currency') or 'NOK'
+        if with_lines:
+            for line in rec.get('lines', []):
+                if line.get('amount_minor') is None:
+                    line['amount_minor'] = receipt_archive.minor(line.get('amount'))
     out.extend(inbox_store.exports(ym, with_lines))
     out.sort(key=lambda x: x["date"])
     return out
@@ -302,17 +319,17 @@ def api_export(ym, fmt):
                         "total": round(sum((x["amount"] or 0) for x in recs if x.get("currency", "NOK") == "NOK"), 2),
                         "bonus": round(sum(x["bonus"] for x in recs), 2),
                         "discount": round(sum(x["discount"] for x in recs), 2),
-                        "total_currency": "NOK", "receipts": recs})
+                        "total_currency": "NOK", "total_minor": sum(x["amount_minor"] or 0 for x in recs if x.get("currency") == "NOK"), "receipts": recs})
     buf = io.StringIO(); w = csv.writer(buf)
-    extra_fields = ['source', 'archive_id', 'currency', 'category', 'review_state', 'confidence', 'linked_to']
+    extra_fields = ['source', 'archive_id', 'currency', 'category', 'review_state', 'confidence', 'linked_to', 'amount_minor', 'payment']
     def extra(x):
         return [json.dumps(x.get(k), ensure_ascii=False) if isinstance(x.get(k), (dict, list)) else
                 x.get(k, 'NOK' if k == 'currency' else '') for k in extra_fields]
     if with_lines:
-        w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"] + extra_fields)
+        w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount", "line_amount_minor", "kind"] + extra_fields)
         for x in recs:
             for l in x.get("lines", []):
-                w.writerow([x["chain"], x["id"], x["date"], x["store"], l["name"], l["ean"], l["qty"], l["amount"]] + extra(x))
+                w.writerow([x["chain"], x["id"], x["date"], x["store"], l["name"], l["ean"], l["qty"], l["amount"], l.get("amount_minor"), l.get("kind")] + extra(x))
     else:
         w.writerow(["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"] + extra_fields)
         for x in recs:

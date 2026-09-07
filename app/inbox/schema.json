@@ -33,9 +33,42 @@
     },
     "payment": {
       "type": [
-        "string",
+        "object",
         "null"
-      ]
+      ],
+      "properties": {
+        "method": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "card_last4": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "terminal": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "auth_code": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "card_last4",
+        "terminal",
+        "auth_code"
+      ],
+      "additionalProperties": false
     },
     "receipt_number": {
       "type": [
