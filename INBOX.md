@@ -53,9 +53,14 @@ Use the exact mailbox names returned by IMAP LIST. The worker lists all mailboxe
 because Bridge can return an empty result for an exact-name LIST even when the mailbox exists.
 Reconnect logs include the exception reason and stack, with configured credentials redacted.
 
-Create a mail filter routing receipts into the corresponding Grocious Inbox folder. Successful messages move to `Grocious/Done`
-only after ingestion of all attachments. Invalid messages remain in `Grocious/Failed`; originals are not
-deleted. `mail_status.json` supplies connection and last-ingestion status. Reconnect uses backoff;
+Prefer a short, dedicated receipt alias such as `receipts@example.com`: it is easier to dictate at a
+checkout or enter on a payment terminal. A plus-address such as `name+kvittering@example.com` is an
+alternative if you do not want a separate alias. Route mail to that address into the Grocious Inbox
+folder. You can also filter known store sender domains for receipts sent to your usual address; review
+those rules so unrelated mail is not imported.
+
+Successful messages move to the configured `IMAP_DONE` folder only after ingestion of all attachments.
+Invalid messages remain in `IMAP_FAILED`; originals are not deleted. `mail_status.json` supplies connection and last-ingestion status. Reconnect uses backoff;
 IDLE is renewed at most every 25 minutes. No timer or cron is installed.
 [IMAPClient's IDLE API](https://imapclient.readthedocs.io/en/3.0.1/api.html#imapclient.IMAPClient.idle)
 is the worker's connection contract.
