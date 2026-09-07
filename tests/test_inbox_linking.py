@@ -96,8 +96,8 @@ def test_discarded_candidate_only_attaches_to_active_primary(client, pair):
     assert page.status_code == 200
     assert "Forkastet post" in page.text
     assert "Koblingen kan foreløpig ikke angres" in page.text
-    assert "Bruk kandidaten som hovedpost" not in page.text
-    assert "Behold denne posten, legg kandidaten ved" in page.text
+    assert "Bruk mail.eml som bilag" not in page.text
+    assert "Bruk invoice.txt (denne) som bilag" in page.text
     with pytest.raises(ValueError):
         linking.link(invoice, "inbox", mail)
     response = client.post("/inbox/" + mail + "/link", data={"source": "inbox", "target": invoice})

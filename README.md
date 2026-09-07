@@ -20,10 +20,10 @@ uses the provider you configure; rules-only interpretation stays local.
 |---|---|---|---|---|---|
 | **Trumf / NorgesGruppen** (Kiwi, Meny, Spar, Joker, Gigaboks) | ✅ | ✅ | ✅ | ✅ | Vendor receipt images (JPEG) archived too |
 | **Rema 1000** | ⚠️ | ✅ | ✅ | ✅ | Coupons only; kroner bonus was replaced by Reitan's *Spenn* points in June 2026 and is not exposed by the API |
-| **Coop** | ✅ | ✅ | ✅ | — | Original PDFs archived; balance needs a separate login the app API does not cover |
+| **Coop** | ✅ | ✅ | ✅ | ✅ | Original PDFs archived; balance needs a separate login the app API does not cover |
 
-Offers are read, listed and can be activated **manually**. Nothing is auto-activated —
-that is a deliberate choice, not a missing feature.
+Offers open a detail page with provider text, terms and images when supplied. Rema activation is
+**manual**; Trumf and Coop offers are read-only. Nothing is auto-activated.
 
 ## How it works
 
@@ -80,7 +80,9 @@ change), so a second `?lines=1` export is fast.
 ## Web UI
 
 Flask, server-rendered Jinja, no CDN and no JS framework. Mobile first: receipts expand in
-place and filter per chain and month. `app/ui.py` handles Norwegian formatting (`1 234,50 kr`,
+place and filter per chain and month, with 50 receipts per page (newest first). Offer dismissal
+is remembered in this browser and can be reset with “Vis skjulte tilbud igjen”. Trumf campaign
+agreement data has no images; Coop coupons exclude redeemed, expired and future entries. `app/ui.py` handles Norwegian formatting (`1 234,50 kr`,
 `dd.mm.yyyy`).
 
 **Themes** are one JSON file each in `app/themes/` — `light`, `dark`, `gruvbox`,

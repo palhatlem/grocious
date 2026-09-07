@@ -154,7 +154,7 @@ def state(rid):
         )
     else:
         store.state(rid, values.get("state"))
-    return jsonify(record(rid)) if wants_json() else redirect("/inbox/" + rid, 303)
+    return jsonify(record(rid)) if wants_json() else redirect("/inbox", 303)
 
 
 @bp.get("/api/inbox/summary")

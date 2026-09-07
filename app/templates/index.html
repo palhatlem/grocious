@@ -40,20 +40,20 @@
 <details class="panel offers-panel">
   <summary><h2>Tilbud &amp; kuponger <span class="pill">aktiver de du vil selv</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
   <div class="offers">
-    {% if r.ok %}{% for o in r.offers %}
-    <div class="offer">
-      {% if o.img %}<img src="{{ o.img }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}
-      <div class="b"><span class="badge rema">Rema</span><div class="t">{{ o.desc }}</div>
-        {% if o.activated %}<span class="done">✓ Aktivert</span>
-        {% else %}<form method="post" action="/rema/offer/{{ o.code }}/activate"><button class="btn">Aktiver</button></form>{% endif %}
-      </div>
-    </div>
-    {% endfor %}{% endif %}
-    {% if t.ok %}{% for o in t.offers %}
-    <div class="offer"><div class="b"><span class="badge trumf">Trumf</span>
-      <div class="t"><b>{{ o.title }}</b><br><span class="mut small">{{ o.desc }}</span></div></div></div>
-    {% endfor %}{% endif %}
-    {% if not (r.ok and r.offers) and not (t.ok and t.offers) %}<p class="mut">Ingen tilbud akkurat nå.</p>{% endif %}
+    {% for o in offer_cards %}
+    <article class="offer" data-offer-id="{{ o.source }}:{{ o.id }}">
+      <button type="button" class="offer-dismiss" aria-label="Skjul {{ o.title }}" title="Skjul tilbud">×</button>
+      <a class="offer-link" href="{{ url_for('offer_detail', source=o.source, oid=o.id) }}">
+        {% if o.img %}<img src="{{ o.img }}" alt="" loading="lazy" onerror="this.style.display='none'">{% endif %}
+        <div class="b"><span class="badge {{ o.source }}">{{ o.source }}</span><div class="t"><b>{{ o.title }}</b>{% if o.desc and o.desc!=o.title %}<br>{{ o.desc }}{% endif %}</div>
+        {% if o.price %}<strong>{{ o.price }}</strong>{% endif %}<span class="mut small">Se detaljer og vilkår →</span></div>
+      </a>
+      {% if o.source=='rema' and o.code %}<div class="b">{% if o.activated %}<span class="done">✓ Aktivert</span>{% else %}<form method="post" action="/rema/offer/{{ o.code }}/activate"><button class="btn">Aktiver</button></form>{% endif %}</div>{% endif %}
+    </article>
+    {% endfor %}
+    <p class="mut" id="offers-empty" {{ 'hidden' if offer_cards }}>Ingen tilbud å vise akkurat nå.</p>
+    {% if c.offers_error %}<p class="mut">{{ c.offers_error }}</p>{% endif %}
+    <button type="button" class="btn" id="offers-reset" hidden>Vis skjulte tilbud igjen</button>
   </div>
 </details>
 
@@ -125,6 +125,7 @@
     </li>
     {% endfor %}
   </ul>
+  <nav class="receipt-pages" aria-label="Kvitteringssider"><button class="btn" id="receipts-prev" type="button" hidden>← Forrige 50</button><span id="receipt-page" aria-live="polite"></span><button class="btn" id="receipts-next" type="button" hidden>Neste 50 →</button></nav>
   <p class="mut small" id="empty" hidden>Ingen kvitteringer for valget.</p>
   <p class="mut small archives">Arkiv med originalfiler: <a href="/archive/trumf">Trumf</a> · <a href="/archive/rema">Rema</a> · <a href="/api/coop/status">Coop importstatus</a></p>
 </section>

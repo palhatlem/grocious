@@ -8,7 +8,7 @@ from flask import Flask, Response, render_template, redirect, abort, request, js
 import receipt_archive
 from inbox import store as inbox_store
 from inbox.routes import bp as inbox_bp
-import demo, themes, ui, dashboard_stats, bonus_sources
+import demo, themes, ui, dashboard_stats, bonus_sources, offers as offer_ui
 
 DATA = os.environ.get("GROCERY_DATA", "/data")
 REMA_PHONE = os.environ.get("REMA_PHONE", "")
@@ -104,7 +104,7 @@ def trumf_data():
         recs.sort(key=lambda x: x["date"], reverse=True)
         return {"ok": True, "saldo": saldo.get("trumfSaldo"), "akkumulert": saldo.get("totaltAkkumulertTrumf"), "account_balance": saldo.get("bokfortSaldo"), "account_available": saldo.get("trumfSaldo"),
                 "oppdatert": (saldo.get("sistOppdatert") or "")[:10], "count": len(recs), "receipts": recs,
-                "offers": [{"title": o.get("visningsTekst"), "desc": o.get("beskrivelse")}
+                "offers": [offer_ui.normalize("trumf", o)
                            for o in (offers if isinstance(offers, list) else [])]}
     except Exception as e:
         return {"ok": False, "err": str(e)}
@@ -153,8 +153,7 @@ def rema_data():
         txs.sort(key=lambda x: x["date"], reverse=True)
         return {"ok": True, "purchaseTotal": heads.get("purchaseTotal"), "discountTotal": heads.get("discountTotal"),
                 "count": len(txs), "receipts": txs, "bonus_balance": balance, "bonus_accumulated": None,
-                "offers": [{"code": o.get("code"), "desc": o.get("desc"), "activated": o.get("activated"),
-                            "img": o.get("dutyText") if str(o.get("dutyText", "")).startswith("http") else None} for o in olist]}
+                "offers": [offer_ui.normalize("rema", o) for o in olist]}
     except Exception as e:
         return {"ok": False, "err": str(e)}
 
@@ -203,13 +202,28 @@ if DEMO:  # anonymised fixtures, no tokens, no network — the real functions ab
 def coop_bonus():
     return {} if DEMO else bonus_sources.coop_data()
 
+@_cache(300)
+def coop_offers():
+    return {"offers": []} if DEMO else offer_ui.coop_data()
+
 def coop_dashboard():
-    return {**receipt_archive.summary('coop'), **coop_bonus(), **({} if DEMO else bonus_sources.account_observation('coop'))}
+    return {**receipt_archive.summary('coop'), **coop_bonus(), **coop_offers(), **({} if DEMO else bonus_sources.account_observation('coop'))}
 
 @app.route("/")
 def index():
     t, r, c = trumf_data(), rema_data(), coop_dashboard()
-    return render_template("index.html", t=t, r=r, c=c, stats=dashboard_stats.cards(t,r,c), inbox=inbox_store.summary(), demo=DEMO, **ui.context(t, r, c))
+    return render_template("index.html", t=t, r=r, c=c, offer_cards=[o for source, data in [("rema",r),("trumf",t),("coop",c)] for o in offer_ui.cards(source,data.get("offers"))], stats=dashboard_stats.cards(t,r,c), inbox=inbox_store.summary(), demo=DEMO, **ui.context(t, r, c))
+
+@app.get("/offers/<source>/<oid>")
+def offer_detail(source, oid):
+    loaders = {"trumf": trumf_data, "rema": rema_data, "coop": coop_offers}
+    if source not in loaders:
+        abort(404)
+    rows = offer_ui.cards(source, loaders[source]().get("offers"))
+    offer = next((o for o in rows if o["id"] == oid), None)
+    if offer is None:
+        abort(404)
+    return render_template("offer_detail.html", o=offer, demo=DEMO, themes=themes.load_themes())
 
 @app.route("/themes.css")
 def themes_css():

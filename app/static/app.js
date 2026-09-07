@@ -22,16 +22,24 @@
   // ---- filters ----------------------------------------------------------
   var nokFmt = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function nok(x) { return nokFmt.format(x) + " kr"; }
-  var chain = "", month = "";
+  var chain = "", month = "", page = 0, pageSize = 50;
   var items = Array.prototype.slice.call(document.querySelectorAll(".receipt"));
+  items.sort(function (a, b) { return b.dataset.date.localeCompare(a.dataset.date); });
+  var list = document.getElementById("list");
+  items.forEach(function (li) { list.appendChild(li); });
+  var prev = document.getElementById("receipts-prev"), next = document.getElementById("receipts-next");
+  var pageEl = document.getElementById("receipt-page");
   var countEl = document.getElementById("count"), totalsEl = document.getElementById("totals"), emptyEl = document.getElementById("empty");
   function applyFilters() {
     var n = 0, sum = 0, bonus = 0, disc = 0;
     items.forEach(function (li) {
       var show = (!chain || li.dataset.chain === chain) && (!month || li.dataset.month === month);
-      li.hidden = !show;
+      li.hidden = !show || n < page * pageSize || n >= (page + 1) * pageSize;
       if (show) { n++; sum += +li.dataset.amount || 0; bonus += +li.dataset.bonus || 0; disc += +li.dataset.discount || 0; }
     });
+    if (prev) prev.hidden = page === 0;
+    if (next) next.hidden = (page + 1) * pageSize >= n;
+    if (pageEl) pageEl.textContent = n ? "Viser " + (page * pageSize + 1) + "–" + Math.min((page + 1) * pageSize, n) + " av " + n : "";
     if (countEl) countEl.textContent = n + " kvitteringer";
     if (totalsEl) totalsEl.textContent = n ? "Sum " + nok(sum) + (bonus ? " · bonus " + nok(bonus) : "") + (disc ? " · rabatt " + nok(disc) : "") : "";
     if (emptyEl) emptyEl.hidden = n > 0;
@@ -39,12 +47,37 @@
   document.querySelectorAll(".chips .chip").forEach(function (b) {
     b.addEventListener("click", function () {
       document.querySelectorAll(".chips .chip").forEach(function (x) { x.classList.remove("on"); });
-      b.classList.add("on"); chain = b.dataset.chain || ""; applyFilters();
+      b.classList.add("on"); chain = b.dataset.chain || ""; page = 0; applyFilters();
     });
   });
   var monthSel = document.getElementById("month");
-  if (monthSel) monthSel.addEventListener("change", function () { month = monthSel.value; applyFilters(); });
+  if (monthSel) monthSel.addEventListener("change", function () { month = monthSel.value; page = 0; applyFilters(); });
+  if (prev) prev.addEventListener("click", function () { page--; applyFilters(); document.getElementById("receipts").scrollIntoView(); });
+  if (next) next.addEventListener("click", function () { page++; applyFilters(); document.getElementById("receipts").scrollIntoView(); });
   applyFilters();
+
+  var hiddenOffers = [], offerKey = "grocious.hiddenOffers";
+  try { var stored = JSON.parse(localStorage.getItem(offerKey) || "[]"); if (Array.isArray(stored)) hiddenOffers = stored; } catch (e) {}
+  var offers = Array.prototype.slice.call(document.querySelectorAll("[data-offer-id]"));
+  var resetOffers = document.getElementById("offers-reset");
+  function showOffers() {
+    var visible = 0;
+    offers.forEach(function (card) { card.hidden = hiddenOffers.indexOf(card.dataset.offerId) !== -1; if (!card.hidden) visible++; });
+    var empty = document.getElementById("offers-empty");
+    if (empty) empty.hidden = visible > 0;
+    if (resetOffers) resetOffers.hidden = !hiddenOffers.length;
+  }
+  offers.forEach(function (card) {
+    card.querySelector(".offer-dismiss").addEventListener("click", function () {
+      if (hiddenOffers.indexOf(card.dataset.offerId) === -1) hiddenOffers.push(card.dataset.offerId);
+      try { localStorage.setItem(offerKey, JSON.stringify(hiddenOffers)); } catch (e) {}
+      showOffers();
+    });
+  });
+  if (resetOffers) resetOffers.addEventListener("click", function () {
+    hiddenOffers = []; try { localStorage.removeItem(offerKey); } catch (e) {} showOffers();
+  });
+  showOffers();
 
   // ---- expandable line items -------------------------------------------
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }

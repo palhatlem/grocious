@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ o.title }} · grocious{% endblock %}
+{% block content %}
+<p><a href="/">← Forsiden</a></p>
+<section class="panel offer-details">
+<span class="badge {{ o.source }}">{{ o.source }}</span><h1>{{ o.title }}</h1>
+{% if o.img %}<img src="{{ o.img }}" alt="" class="offer-image">{% endif %}
+{% if o.desc and o.desc!=o.title %}<p>{{ o.desc }}</p>{% endif %}
+{% for key,label in [('price','Tilbud'),('terms','Vilkår'),('notice','Mer informasjon'),('expires','Gyldighet')] %}
+{% if o.get(key) %}<h2>{{ label }}</h2><p class="offer-copy">{{ o[key] }}</p>{% endif %}{% endfor %}
+{% if o.url %}<p><a href="{{ o.url }}" target="_blank" rel="noopener noreferrer">Åpne hos tilbyderen ↗</a></p>{% endif %}
+<p class="mut small">Opplysninger hentet fra {{ o.source }}. Å åpne tilbudet aktiverer det ikke.</p>
+</section>
+{% endblock %}
