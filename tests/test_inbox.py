@@ -144,3 +144,23 @@ def test_interpretations(client, inbox_data, monkeypatch):
         json.loads((archive.folder("inbox", rid) / "interpretation-1.json").read_text())["request"]["image_sha256"]
         == []
     )
+
+
+def test_mail_ingest(inbox_data):
+    from inbox import mailworker
+    from email.message import EmailMessage
+    from unittest.mock import Mock
+
+    msg = EmailMessage()
+    msg["From"] = "shop@example.com"
+    msg.set_content("Synthetic mail")
+    msg.add_attachment(
+        b"KIWI Demo\n07.09.2026\nTOTALT 22,00 NOK", maintype="text", subtype="plain", filename="receipt.txt"
+    )
+    client = Mock()
+    result = mailworker.process_message(client, 12, msg.as_bytes())
+    assert len(result["children"]) == 1
+    client.move.assert_called_once_with([12], "Grocious/Done")
+    assert archive.read_receipt("inbox", result["children"][0])["intake"]["parent"] == result["rid"]
+    again = mailworker.process_message(client, 12, msg.as_bytes())
+    assert again["duplicate"]

@@ -49,3 +49,14 @@ services:
     env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [PLAYWRIGHT_BROWSERS_PATH=/ms-playwright]
     volumes: ["${GROCIOUS_HOME:-.}:/work", "${GROCIOUS_HOME:-.}/data:/data"]
+
+  # Enable only after IMAP credentials and Bridge connectivity are configured.
+  inbox-mail:
+    build: {context: ., dockerfile: Dockerfile.web}
+    image: grocery-web:latest
+    command: ["python", "-m", "inbox.mailworker"]
+    profiles: ["mail"]
+    env_file: ${GROCIOUS_HOME:-.}/.env
+    environment: [GROCERY_DATA=/data, TZ=Europe/Oslo]
+    volumes: ["${GROCIOUS_HOME:-.}/data:/data"]
+    restart: unless-stopped
