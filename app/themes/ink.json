@@ -1,23 +1,23 @@
 {
- "id": "ink",
- "label": "Ink",
- "scheme": "dark",
- "colors": {
-  "bg": "#0b0c10",
-  "bg2": "#050608",
-  "card": "#12141a",
-  "card2": "#191c24",
-  "line": "#242833",
-  "fg": "#e6e8ee",
-  "mut": "#7d8494",
-  "accent": "#7aa2f7",
-  "accent-fg": "#0b0c10",
-  "pos": "#5fd08a",
-  "neg": "#e8735a",
-  "warn": "#e0af68",
-  "trumf": "#9b8cff",
-  "rema": "#4a90d9",
-  "coop": "#3fb68b",
-  "shadow": "rgba(0,0,0,.5)"
- }
+  "id": "ink",
+  "label": "Ink",
+  "scheme": "dark",
+  "colors": {
+    "bg": "#17171a",
+    "bg2": "#1c1c20",
+    "card": "#1e1e22",
+    "card2": "#26262b",
+    "line": "#35353d",
+    "fg": "#eae8ee",
+    "mut": "#b0afb6",
+    "accent": "#cba6f7",
+    "accent-fg": "#17171a",
+    "pos": "#5fae74",
+    "neg": "#f38ba8",
+    "warn": "#d3a027",
+    "trumf": "#9b8cff",
+    "rema": "#4a90d9",
+    "coop": "#3fb68b",
+    "shadow": "rgba(0,0,0,.4)"
+  }
 }

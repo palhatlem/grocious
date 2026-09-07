@@ -1,0 +1,23 @@
+{
+  "id": "zenburn",
+  "label": "Zenburn",
+  "scheme": "dark",
+  "colors": {
+    "bg": "#2b2b2b",
+    "bg2": "#2f2f2f",
+    "card": "#3f3f3f",
+    "card2": "#4f4f4f",
+    "line": "#5f5f5f",
+    "fg": "#dcdccc",
+    "mut": "#afafa0",
+    "accent": "#8cd0d3",
+    "accent-fg": "#2b2b2b",
+    "pos": "#8fb28f",
+    "neg": "#cc9393",
+    "warn": "#f0dfaf",
+    "trumf": "#8cd0d3",
+    "rema": "#c8c8b9",
+    "coop": "#8fb28f",
+    "shadow": "rgba(0,0,0,.4)"
+  }
+}

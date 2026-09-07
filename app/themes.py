@@ -32,7 +32,17 @@ COLOR_KEYS = (
     "coop",
     "shadow",
 )
-DEFAULT_ORDER = ("light", "dark", "gruvbox", "catppuccin-mocha", "ink")
+DEFAULT_ORDER = (
+    "light",
+    "dark",
+    "ink",
+    "gruvbox",
+    "zenburn",
+    "catppuccin-latte",
+    "catppuccin-frappe",
+    "catppuccin-macchiato",
+    "catppuccin-mocha",
+)
 
 
 def load_themes():

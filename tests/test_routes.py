@@ -31,7 +31,17 @@ def test_index_survives_failed_sources(client, monkeypatch):
 def test_themes_css_and_files(client):
     css = client.get("/themes.css").get_data(as_text=True)
     ids = [t["id"] for t in themes.load_themes()]
-    assert ids[:5] == ["light", "dark", "gruvbox", "catppuccin-mocha", "ink"]
+    assert ids == [
+        "light",
+        "dark",
+        "ink",
+        "gruvbox",
+        "zenburn",
+        "catppuccin-latte",
+        "catppuccin-frappe",
+        "catppuccin-macchiato",
+        "catppuccin-mocha",
+    ]
     assert css.startswith("/* generated") and ":root{color-scheme:light;" in css
     assert "@media (prefers-color-scheme: dark){:root:not([data-theme]){color-scheme:dark;" in css
     for i in ids:

@@ -86,7 +86,8 @@ agreement data has no images; Coop coupons exclude redeemed, expired and future 
 `dd.mm.yyyy`).
 
 **Themes** are one JSON file each in `app/themes/` — `light`, `dark`, `gruvbox`,
-`catppuccin-mocha` and `ink` ship. Drop in another file (`{"label": "…", "scheme":
+`zenburn`, `ink`, and all four Catppuccin flavors (`latte`, `frappe`, `macchiato`, `mocha`) ship.
+These seven named palettes match Chattr; Light and Dark remain available. Drop in another file (`{"label": "…", "scheme":
 "light|dark", "colors": {...}}` with keys from `themes.COLOR_KEYS`; missing keys fall back to
 the base scheme) and restart, and it appears in the picker. The picker remembers the choice
 in `localStorage`, «Auto» follows `prefers-color-scheme`, and `?theme=<id>` forces one.

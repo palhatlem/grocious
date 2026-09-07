@@ -1,0 +1,23 @@
+{
+  "id": "catppuccin-macchiato",
+  "label": "Catppuccin Macchiato",
+  "scheme": "dark",
+  "colors": {
+    "bg": "#24273a",
+    "bg2": "#2d3044",
+    "card": "#1e2030",
+    "card2": "#363a4f",
+    "line": "#494d64",
+    "fg": "#cad3f5",
+    "mut": "#a5adcb",
+    "accent": "#c6a0f6",
+    "accent-fg": "#181926",
+    "pos": "#a6da95",
+    "neg": "#ed8796",
+    "warn": "#eed49f",
+    "trumf": "#c6a0f6",
+    "rema": "#b8c0e0",
+    "coop": "#a6da95",
+    "shadow": "rgba(0,0,0,.4)"
+  }
+}
