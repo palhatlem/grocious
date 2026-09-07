@@ -254,7 +254,8 @@ def correct(rid, edits):
         values["lines"] = normalize({"lines": values["lines"]})["lines"]
     with locked():
         directory = archive.folder("inbox", rid)
-        archive.read_receipt("inbox", rid)
+        if archive.read_receipt("inbox", rid).get("linked_to"):
+            raise ValueError("Kvitteringen er koblet. Gjennomgå den via kjedekvitteringen.")
         path = directory / "corrections.json"
         old = json.loads(path.read_text()) if path.exists() else {}
         archive.atomic_json(path, {**old, **values, "at": now()})
@@ -267,6 +268,8 @@ def state(rid, value):
         raise ValueError("Ugyldig status")
     with locked():
         r = archive.read_receipt("inbox", rid)
+        if r.get("linked_to"):
+            raise ValueError("En koblet kvittering beholdes som vedlegg; den kan ikke eksporteres på nytt")
         if value == "confirmed" and (
             r.get("amount_minor") is None or any(not r.get(k) for k in ("store", "date", "currency"))
         ):
@@ -285,9 +288,22 @@ def summary():
         s: sum(r.get("review", {}).get("state") == s for r in rows)
         for s in ("needs_review", "confirmed", "discarded", "linked")
     }
+    month = dt.date.today().isoformat()[:7]
+    monthly = [
+        r
+        for r in rows
+        if (r.get("date") or "").startswith(month) and r.get("review", {}).get("state") not in ("linked", "discarded")
+    ]
+    totals = {}
+    for r in monthly:
+        if r.get("currency") and r.get("amount_minor") is not None:
+            totals[r["currency"]] = totals.get(r["currency"], 0) + r["amount_minor"]
     from .llm import providers
 
     return dict(
+        month=month,
+        month_count=len(monthly),
+        totals={k: v / 100 for k, v in totals.items()},
         providers=providers(),
         mail=json.loads((archive.root() / "inbox" / "mail_status.json").read_text())
         if (archive.root() / "inbox" / "mail_status.json").exists()

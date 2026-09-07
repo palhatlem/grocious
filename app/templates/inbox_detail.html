@@ -11,6 +11,8 @@
 <p><a href="/inbox/{{ r.archive_id }}.json">JSON</a> · <a href="/inbox/{{ r.archive_id }}.csv">CSV</a> · <a href="/inbox/{{ r.archive_id }}.pdf">PDF</a> · <a href="/inbox/{{ r.archive_id }}.zip">Alle filer</a></p>
 </section>
 <section class="panel">
+{% if r.linked_to %}<p>Koblet til <a href="/archive/{{ r.linked_to.source }}/{{ r.linked_to.archive_id }}">kjedekvitteringen</a>.</p>{% endif %}
+{% if candidates and not r.linked_to %}<details open><summary>Mulig duplikat ({{ candidates|length }})</summary>{% for candidate in candidates %}<form method="post" action="/inbox/{{ r.archive_id }}/link"><input type="hidden" name="source" value="{{ candidate.source }}"><input type="hidden" name="target" value="{{ candidate.archive_id }}"><p><a href="/archive/{{ candidate.source }}/{{ candidate.archive_id }}">{{ candidate.store }} · {{ candidate.date }} · {{ candidate.amount }}</a><br>{{ candidate.reason }}</p><button class="btn">Koble og behold som vedlegg</button></form>{% endfor %}</details>{% endif %}
 <h2>Tolk kvitteringen</h2>
 <p class="mut small">Bare denne kvitteringen sendes til valgt leverandør. Egne rettelser overstyrer tolkingen.</p>
 <div class="chips">{% for p in providers %}<form method="post" action="/inbox/{{ r.archive_id }}/interpret"><input type="hidden" name="provider" value="{{ p.id }}"><button class="btn" {{ 'disabled' if not p.available }} title="{{ p.model if p.available else 'Ikke konfigurert' }}">{{ p.label }}</button></form>{% endfor %}</div>

@@ -173,6 +173,8 @@ def history(rid):
 
 def select(rid, number):
     with store.locked():
+        if archive.read_receipt("inbox", rid).get("linked_to"):
+            raise ValueError("Kvitteringen er allerede koblet")
         directory = archive.folder("inbox", rid)
         path = directory / f"interpretation-{int(number)}.json"
         if not path.exists():
@@ -189,6 +191,8 @@ def run(rid, provider_id):
     if provider is None or not provider.available:
         raise ValueError("Leverandøren er ikke konfigurert")
     r = archive.read_receipt("inbox", rid)
+    if r.get("linked_to"):
+        raise ValueError("Kvitteringen er allerede koblet")
     hints = {k: r["intake"].get(k) for k in ("filename", "mimetype", "received_at", "sender_domain")}
     images, hashes = [], []
     if provider.vision:

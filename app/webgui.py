@@ -209,7 +209,7 @@ def coop_dashboard():
 @app.route("/")
 def index():
     t, r, c = trumf_data(), rema_data(), coop_dashboard()
-    return render_template("index.html", t=t, r=r, c=c, stats=dashboard_stats.cards(t,r,c), demo=DEMO, **ui.context(t, r, c))
+    return render_template("index.html", t=t, r=r, c=c, stats=dashboard_stats.cards(t,r,c), inbox=inbox_store.summary(), demo=DEMO, **ui.context(t, r, c))
 
 @app.route("/themes.css")
 def themes_css():

@@ -147,3 +147,5 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .inbox-actions { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 10px; background: var(--card); padding: 12px; border-top: 1px solid var(--line); }
 
 .inbox-line-scroll{overflow:auto}.inbox-line-scroll input{min-width:5rem}.inbox-line-scroll td:first-child input{min-width:12rem}
+
+.inbox-thumb{width:44px;height:60px;object-fit:contain;vertical-align:middle;margin-right:.6rem}.inbox-rows li{padding:.65rem 0}

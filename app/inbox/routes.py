@@ -6,7 +6,7 @@ from flask import Blueprint, abort, jsonify, redirect, render_template, request,
 from werkzeug.exceptions import RequestEntityTooLarge
 import receipt_archive as archive
 import themes
-from . import store, llm
+from . import store, llm, linking
 from .extract import MAX_BYTES
 from .heuristics import CATEGORIES
 
@@ -95,6 +95,7 @@ def detail(rid):
         pdf=pdf,
         lines_json=json.dumps(r["lines"], ensure_ascii=False),
         runs=llm.history(rid),
+        candidates=linking.candidates(rid),
         **context(),
     )
 
@@ -118,7 +119,15 @@ def corrections(rid):
 def state(rid):
     record(rid)
     values = request.get_json() if request.is_json else request.form
-    store.state(rid, values.get("state"))
+    if values.get("state") == "linked":
+        target = values.get("linked_to") or {}
+        linking.link(
+            rid,
+            target.get("source") if isinstance(target, dict) else None,
+            target.get("archive_id") if isinstance(target, dict) else None,
+        )
+    else:
+        store.state(rid, values.get("state"))
     return jsonify(record(rid)) if wants_json() else redirect("/inbox/" + rid, 303)
 
 
@@ -208,3 +217,29 @@ def interpret(rid):
     else:
         llm.run(rid, values.get("provider", "none"))
     return jsonify(record(rid)) if wants_json() else redirect("/inbox/" + rid, 303)
+
+
+@bp.get("/inbox/<rid>/candidates")
+def candidates(rid):
+    record(rid)
+    return jsonify(linking.candidates(rid))
+
+
+@bp.post("/inbox/<rid>/link")
+def link(rid):
+    record(rid)
+    linking.link(rid, request.form.get("source"), request.form.get("target"))
+    return redirect("/inbox/" + rid, 303)
+
+
+@bp.get("/inbox/<rid>/thumbnail")
+def thumbnail(rid):
+    from .thumbnails import thumbnail as preview
+
+    try:
+        path = preview(rid)
+    except (ValueError, FileNotFoundError):
+        abort(404)
+    response = send_file(path, mimetype="image/jpeg")
+    response.headers["Cache-Control"] = "private, no-store"
+    return response

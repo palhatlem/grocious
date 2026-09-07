@@ -102,6 +102,11 @@ def read_receipt(source,rid):
     if source == 'inbox':
         from inbox.store import overlay
         record = overlay(record, directory)
+    additions = directory / 'user-uploads.json'
+    if additions.exists():
+        extra = json.loads(additions.read_text())
+        record['documents'] = record.get('documents', []) + extra['documents']
+        record['linked_from'] = extra['linked_from']
     return record
 
 def summary(source):

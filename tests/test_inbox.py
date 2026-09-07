@@ -164,3 +164,43 @@ def test_mail_ingest(inbox_data):
     assert archive.read_receipt("inbox", result["children"][0])["intake"]["parent"] == result["rid"]
     again = mailworker.process_message(client, 12, msg.as_bytes())
     assert again["duplicate"]
+
+
+def test_link_survives_provider_refresh(client, inbox_data):
+    from inbox import linking, llm
+
+    rid = store.ingest(b"KIWI Test\n07.09.2026\nTOTALT 42,00 NOK")["rid"]
+    target = archive.key("trumf", "demo-target")
+    directory = archive.folder("trumf", target)
+    raw = dict(archive.read_receipt("inbox", rid), archive_id=target, id="demo-target", documents=[])
+    archive.atomic_json(directory / "receipt.json", raw)
+    archive.rebuild("trumf")
+    assert linking.candidates(rid)[0]["exact"]
+    linking.link(rid, "trumf", target)
+    linking.link(rid, "trumf", target)
+    assert not store.exports("2026-09")
+    archive.atomic_json(directory / "receipt.json", raw)  # normal fetcher refresh
+    linked = archive.read_receipt("trumf", target)
+    assert linked["linked_from"] == [rid]
+    assert len(linked["documents"]) == 1
+    archive.document("trumf", target, linked["documents"][0]["filename"])
+    for action in (
+        lambda: store.correct(rid, {"amount": 42}),
+        lambda: store.state(rid, "confirmed"),
+        lambda: llm.run(rid, "none"),
+    ):
+        with pytest.raises(ValueError):
+            action()
+
+
+def test_thumbnail(client, inbox_data):
+    from PIL import Image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (320, 800), "white").save(buf, "PNG")
+    rid = store.ingest(buf.getvalue(), "test.png", "image/png")["rid"]
+    response = client.get(f"/inbox/{rid}/thumbnail")
+    assert response.status_code == 200
+    assert response.mimetype == "image/jpeg"
+    with Image.open(io.BytesIO(response.data)) as preview:
+        assert preview.width <= 180 and preview.height <= 240

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+<section class="panel"><details><summary>Andre kvitteringer · {{ inbox.month_count }} denne måneden{% if inbox.needs_review %} · {{ inbox.needs_review }} til gjennomgang{% endif %}</summary><p>{% for currency,total in inbox.totals.items() %}{{ total|nok(2) }} {{ currency }}{% if not loop.last %} · {% endif %}{% else %}Ingen beløp denne måneden{% endfor %}</p><a class="btn" href="/inbox">Åpne innboks</a></details></section>
 <section class="stats">
   {% for stat in stats %}
   <div class="stat {{ stat.source }}">
