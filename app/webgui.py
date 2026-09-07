@@ -321,7 +321,7 @@ def api_export(ym, fmt):
                         "discount": round(sum(x["discount"] for x in recs), 2),
                         "total_currency": "NOK", "total_minor": sum(x["amount_minor"] or 0 for x in recs if x.get("currency") == "NOK"), "receipts": recs})
     buf = io.StringIO(); w = csv.writer(buf)
-    extra_fields = ['source', 'archive_id', 'currency', 'category', 'review_state', 'confidence', 'linked_to', 'amount_minor', 'payment']
+    extra_fields = ['source', 'archive_id', 'currency', 'category', 'review_state', 'confidence', 'linked_to', 'amount_minor', 'payment', 'interpretation_notes']
     def extra(x):
         return [json.dumps(x.get(k), ensure_ascii=False) if isinstance(x.get(k), (dict, list)) else
                 x.get(k, 'NOK' if k == 'currency' else '') for k in extra_fields]

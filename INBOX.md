@@ -123,3 +123,17 @@ not authenticated merchant identities. Rules also read an explicitly labelled fo
 such as `Visa - 1234`, in addition to masked card numbers. Full multi-column item/tax reconstruction is
 not guaranteed. Use the **Regler** button to append a fresh interpretation of an existing receipt after
 upgrading. Originals and the initial parse stay unchanged; any user corrections continue to take precedence.
+
+## Separate VAT and payment references
+
+Validation first compares the printed line totals with the receipt total. If they differ, a second check
+requires complete VAT rows whose bases sum to the line total, whose taxes agree with their printed rates
+(within one minor unit per tax row for rounding), and whose total tax explains the exact difference.
+Only then is `reconciliation=lines_plus_tax` reported and the mismatch issue cleared. The raw line
+sum/difference remain in `line_sum_minor` and `raw_line_difference_minor`; `difference_minor` is the
+remaining difference after reconciliation. Gross line totals are never taxed again. This arithmetic check
+does not confirm that a model read the source correctly; the receipt remains subject to review.
+
+Prompt `interpret-v3` distinguishes physical terminal identifiers and authorisation codes from PSP
+references and processor names. Other references go in `interpretation_notes`, retained in the receipt,
+exports and review UI. Existing interpretations are preserved; the new prompt applies to future runs.

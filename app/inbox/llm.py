@@ -14,7 +14,7 @@ import receipt_archive as archive
 
 HERE = Path(__file__).parent
 SCHEMA = json.loads((HERE / "schema.json").read_text())
-PROMPT = (HERE / "prompts/interpret-v2.md").read_text()
+PROMPT = (HERE / "prompts/interpret-v3.md").read_text()
 
 
 class Provider(Protocol):
@@ -252,7 +252,7 @@ def run(rid, provider_id, model=None):
     metadata = dict(
         provider=provider_id,
         model=provider.model,
-        prompt_version="interpret-v2" if provider_id != "none" else RULES_VERSION,
+        prompt_version="interpret-v3" if provider_id != "none" else RULES_VERSION,
         ran_at=store.now(),
         latency_ms=round((time.monotonic() - started) * 1000),
         input_tokens=result["input_tokens"],

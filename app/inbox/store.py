@@ -6,6 +6,7 @@ import hashlib
 import json
 from contextlib import contextmanager
 from pathlib import Path
+from decimal import Decimal
 
 import receipt_archive as archive
 from .extract import extract
@@ -60,6 +61,7 @@ def normalize(parsed):
         category=parsed.get("category") or "ukjent",
         receipt_number=parsed.get("receipt_number"),
         payment=normalize_payment(parsed.get("payment")),
+        interpretation_notes=parsed.get("notes"),
     )
 
 
@@ -81,9 +83,47 @@ def validate(record):
     difference = (
         total - record["amount_minor"] if total is not None and record.get("amount_minor") is not None else None
     )
+    raw_difference = difference
+    reconciliation = "lines" if difference == 0 else None
+    tax_sum = None
+    taxes = record.get("tax") or []
+    if difference not in (None, 0) and taxes:
+        # Net item amounts may reconcile with separately printed VAT. Require complete
+        # bases, taxes and rates, and a base total matching the item total.
+        complete = True
+        base_sum, candidate_tax = 0, 0
+        for row in taxes:
+            try:
+                base = row.get("base_minor") if row.get("base_minor") is not None else money(row.get("base"))
+                tax = row.get("tax_minor") if row.get("tax_minor") is not None else money(row.get("tax"))
+                rate = Decimal(str(row.get("rate")))
+                if type(base) is not int or type(tax) is not int or not rate.is_finite() or not 0 <= rate <= 100:
+                    complete = False
+                    break
+                expected = int((Decimal(base) * rate / 100).quantize(Decimal("1")))
+                if abs(expected - tax) > 1:
+                    complete = False
+                    break
+                base_sum += base
+                candidate_tax += tax
+            except (ValueError, ArithmeticError, TypeError, AttributeError):
+                complete = False
+                break
+        if complete:
+            tax_sum = candidate_tax
+            if base_sum == total and total + tax_sum == record["amount_minor"]:
+                reconciliation = "lines_plus_tax"
+                difference = 0
     if difference not in (None, 0):
         issues.append("line_total_difference")
-    return dict(issues=issues, line_sum_minor=total, difference_minor=difference)
+    return dict(
+        issues=issues,
+        line_sum_minor=total,
+        difference_minor=difference,
+        raw_line_difference_minor=raw_difference,
+        reconciliation=reconciliation,
+        tax_sum_minor=tax_sum,
+    )
 
 
 def overlay(record, directory):
@@ -346,6 +386,7 @@ def exports(ym, with_lines=False):
                     "category",
                     "linked_to",
                     "payment",
+                    "interpretation_notes",
                 )
             }
             out.update(
