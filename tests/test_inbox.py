@@ -99,3 +99,11 @@ def test_invalid_file_and_corrections(client, inbox_data):
     assert client.post("/inbox/" + rid + "/corrections", json={"amount": "NaN"}).status_code == 400
     assert client.post("/inbox/" + rid + "/corrections", json={"documents": []}).status_code == 400
     assert client.get("/inbox/not-a-hash").status_code == 404
+
+
+def test_pwa(client):
+    response = client.get("/manifest.webmanifest")
+    assert response.mimetype == "application/manifest+json"
+    assert response.json["share_target"]["action"] == "/inbox"
+    assert {i["sizes"] for i in response.json["icons"]} == {"192x192", "512x512"}
+    assert b"caches." not in client.get("/sw.js").data

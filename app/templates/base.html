@@ -9,6 +9,9 @@
 <script>/* apply the remembered theme before first paint */
 try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") document.documentElement.setAttribute("data-theme", th); } catch (e) {}
 </script>
+<link rel="apple-touch-icon" href="/static/brand/grocious-pwa-192.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1d2021">
 </head>
 <body>
 <header class="top">
@@ -34,5 +37,6 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
   <span class="links"><a href="/api/summary">api/summary</a>{% if current_month %} · <a href="/api/export/{{ current_month }}.csv">eksport {{ current_month }}</a>{% endif %}</span>
 </footer>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});</script>
 </body>
 </html>

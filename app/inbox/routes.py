@@ -177,3 +177,20 @@ def file(rid, filename):
     response.headers["Content-Security-Policy"] = "sandbox; default-src 'none'"
     response.headers["Cache-Control"] = "private, no-store"
     return response
+
+
+@bp.get("/manifest.webmanifest")
+def manifest():
+    from flask import current_app
+
+    return send_file(current_app.static_folder + "/manifest.webmanifest", mimetype="application/manifest+json")
+
+
+@bp.get("/sw.js")
+def worker_script():
+    from flask import current_app
+
+    response = send_file(current_app.static_folder + "/sw.js", mimetype="application/javascript")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
