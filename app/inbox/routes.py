@@ -27,7 +27,27 @@ def record(rid):
 def context():
     import webgui
 
-    return dict(themes=themes.load_themes(), demo=webgui.DEMO, categories=CATEGORIES, providers=llm.providers())
+    return dict(
+        themes=themes.load_themes(),
+        demo=webgui.DEMO,
+        categories=CATEGORIES,
+        providers=llm.providers(),
+        states={
+            "needs_review": "Til gjennomgang",
+            "confirmed": "Bekreftet",
+            "discarded": "Forkastet",
+            "linked": "Koblet",
+        },
+        issues={
+            "total_unparsed": "Totalbeløp mangler",
+            "date_unparsed": "Dato mangler",
+            "store_unparsed": "Butikk mangler",
+            "currency_unparsed": "Valuta mangler",
+            "no_structured_lines": "Varelinjer mangler",
+            "line_total_difference": "Varelinjene summerer ikke til totalen",
+            "llm_total_not_in_text": "Modellens totalbeløp finnes ikke i teksten",
+        },
+    )
 
 
 @bp.errorhandler(ValueError)
@@ -119,6 +139,8 @@ def corrections(rid):
 def state(rid):
     record(rid)
     values = request.get_json() if request.is_json else request.form
+    if not hasattr(values, "get"):
+        raise ValueError("Ugyldig status")
     if values.get("state") == "linked":
         target = values.get("linked_to") or {}
         linking.link(
@@ -215,7 +237,7 @@ def interpret(rid):
     if values.get("run"):
         llm.select(rid, values["run"])
     else:
-        llm.run(rid, values.get("provider", "none"))
+        llm.run(rid, values.get("provider", "none"), values.get("model"))
     return jsonify(record(rid)) if wants_json() else redirect("/inbox/" + rid, 303)
 
 

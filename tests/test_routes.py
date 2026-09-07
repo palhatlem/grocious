@@ -72,11 +72,12 @@ def test_api_export_json_and_csv(client):
     r = client.get("/api/export/2026-06.csv")
     rows = list(csv.reader(io.StringIO(r.get_data(as_text=True))))
     assert (
-        rows[0] == ["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"]
+        rows[0][:7] == ["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"]
         and len(rows) == d["count"] + 1
     )
     rows = list(csv.reader(io.StringIO(client.get("/api/export/2026-06.csv?lines=1").get_data(as_text=True))))
-    assert rows[0] == ["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"]
+    assert rows[0][:8] == ["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"]
+    assert "review_state" in rows[0]
     assert client.get("/api/export/2026-6.json").status_code == 404
     assert client.get("/api/export/2026-06.pdf").status_code == 404
 

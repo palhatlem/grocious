@@ -24,3 +24,10 @@ if (editor) {
     document.getElementById('lines-value').value = JSON.stringify(lines);
   });
 }
+
+document.querySelectorAll('form[action$="/interpret"]').forEach(form => {
+  form.addEventListener('submit', () => {
+    const button = form.querySelector('button');
+    button.disabled = true; button.textContent = 'Venter …';
+  });
+});

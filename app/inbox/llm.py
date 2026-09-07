@@ -75,7 +75,7 @@ class Claude:
 
     @property
     def model(self):
-        return os.getenv("GROCIOUS_LLM_CLAUDE_MODEL", "claude-opus-5")
+        return getattr(self, "selected_model", None) or os.getenv("GROCIOUS_LLM_CLAUDE_MODEL", "claude-opus-5")
 
     @property
     def available(self):
@@ -158,7 +158,17 @@ REGISTRY = {p.id: p for p in (Rules(), Claude(), OpenAI(), Gateway())}
 
 def providers():
     return [
-        dict(id=p.id, label=p.label, vision=p.vision, available=p.available, model=p.model) for p in REGISTRY.values()
+        dict(
+            id=p.id,
+            label=p.label,
+            vision=p.vision,
+            available=p.available,
+            model=p.model,
+            models=[p.model, os.getenv("GROCIOUS_LLM_CLAUDE_CHEAP_MODEL", "claude-sonnet-5")]
+            if p.id == "claude"
+            else [],
+        )
+        for p in REGISTRY.values()
     ]
 
 
@@ -186,10 +196,22 @@ def select(rid, number):
         archive.rebuild("inbox")
 
 
-def run(rid, provider_id):
+def run(rid, provider_id, model=None):
+    if not isinstance(provider_id, str):
+        raise ValueError("Ugyldig leverandør")
     provider = REGISTRY.get(provider_id)
     if provider is None or not provider.available:
         raise ValueError("Leverandøren er ikke konfigurert")
+    if model:
+        import copy
+
+        if provider_id != "claude" or model not in (
+            provider.model,
+            os.getenv("GROCIOUS_LLM_CLAUDE_CHEAP_MODEL", "claude-sonnet-5"),
+        ):
+            raise ValueError("Ukjent modellvalg")
+        provider = copy.copy(provider)
+        provider.selected_model = model
     r = archive.read_receipt("inbox", rid)
     if r.get("linked_to"):
         raise ValueError("Kvitteringen er allerede koblet")
@@ -216,6 +238,14 @@ def run(rid, provider_id):
         try:
             jsonschema.validate(parsed, SCHEMA)
             store.normalize(parsed)
+            import datetime as dt
+
+            if parsed.get("date"):
+                dt.date.fromisoformat(parsed["date"])
+            if parsed.get("time"):
+                dt.time.fromisoformat(parsed["time"])
+            if any(v is not None and not 0 <= v <= 1 for v in (parsed.get("confidence") or {}).values()):
+                raise ValueError("Invalid confidence")
         except (jsonschema.ValidationError, ValueError, TypeError) as e:
             raise ValueError("Tolkingen hadde ugyldige felter; eksisterende data er beholdt.") from e
     raw = json.dumps(result["raw"], ensure_ascii=False)

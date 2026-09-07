@@ -15,11 +15,11 @@
 {% if candidates and not r.linked_to %}<details open><summary>Mulig duplikat ({{ candidates|length }})</summary>{% for candidate in candidates %}<form method="post" action="/inbox/{{ r.archive_id }}/link"><input type="hidden" name="source" value="{{ candidate.source }}"><input type="hidden" name="target" value="{{ candidate.archive_id }}"><p><a href="/archive/{{ candidate.source }}/{{ candidate.archive_id }}">{{ candidate.store }} · {{ candidate.date }} · {{ candidate.amount }}</a><br>{{ candidate.reason }}</p><button class="btn">Koble og behold som vedlegg</button></form>{% endfor %}</details>{% endif %}
 <h2>Tolk kvitteringen</h2>
 <p class="mut small">Bare denne kvitteringen sendes til valgt leverandør. Egne rettelser overstyrer tolkingen.</p>
-<div class="chips">{% for p in providers %}<form method="post" action="/inbox/{{ r.archive_id }}/interpret"><input type="hidden" name="provider" value="{{ p.id }}"><button class="btn" {{ 'disabled' if not p.available }} title="{{ p.model if p.available else 'Ikke konfigurert' }}">{{ p.label }}</button></form>{% endfor %}</div>
+<div class="chips">{% for p in providers %}<form method="post" action="/inbox/{{ r.archive_id }}/interpret"><input type="hidden" name="provider" value="{{ p.id }}">{% if p.models %}<select aria-label="Claude-modell" name="model" {{ "disabled" if not p.available }}>{% for model in p.models %}<option>{{ model }}</option>{% endfor %}</select>{% endif %}<button class="btn" {{ 'disabled' if not p.available }} title="{{ p.model if p.available else 'Ikke konfigurert' }}">{{ p.label }}</button></form>{% endfor %}</div>
 <p>Aktiv: {{ r.interpretation.provider }} · {{ r.interpretation.model or 'regler' }}</p>
 <details><summary>Tidligere tolkinger ({{ runs|length }})</summary>{% for run in runs %}<form method="post" action="/inbox/{{ r.archive_id }}/interpret"><input type="hidden" name="run" value="{{ run.run }}"><p>{{ run.model }} · {{ run.ran_at }} · {{ run.input_tokens }} inn / {{ run.output_tokens }} ut · {{ run.parsed.total }} {{ run.parsed.currency }}</p><button class="btn">Bruk denne tolkingen</button></form>{% endfor %}</details>
-<h1>{{ r.store or 'Gjennomgå kvittering' }}</h1><p>Status: {{ r.review.state }}</p>
-{% if r.validation.issues %}<p class="err">Kontroller: {{ r.validation.issues|join(', ') }}</p>{% endif %}
+<h1>{{ r.store or 'Gjennomgå kvittering' }}</h1><p>Status: {{ states.get(r.review.state, r.review.state) }}</p>
+{% if r.validation.issues %}<p class="err">Kontroller: {% for issue in r.validation.issues %}{{ issues.get(issue, issue) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
 <form method="post" action="/inbox/{{ r.archive_id }}/corrections" class="inbox-fields">
 <label>Butikk<input name="store" value="{{ r.store or '' }}"></label>
 <label>Dato<input type="date" name="date" value="{{ r.date or '' }}"></label>

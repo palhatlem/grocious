@@ -51,7 +51,7 @@ picker. The picker (header) remembers the choice in `localStorage`; «Auto» fol
 `python scripts/gen_fixtures.py`) for Trumf, Rema and a small Coop archive — no tokens, no network:
 
 ```
-python -m venv .venv && .venv/bin/pip install flask requests reportlab waitress pytest ruff
+python -m venv .venv && .venv/bin/pip install flask requests reportlab waitress pillow pillow-heif html2text anthropic openai jsonschema imapclient pytest ruff
 cd app && GROCIOUS_DEMO=1 PORT=3012 ../.venv/bin/python webgui.py
 .venv/bin/pytest && .venv/bin/ruff check .
 ```
@@ -83,3 +83,7 @@ Trumf transaction fields from [ttyridal/trumf-data-fetch](https://github.com/tty
 
 The wordmark uses locally hosted [Space Grotesk](https://github.com/floriankarsten/space-grotesk),
 licensed under the SIL Open Font License (included in `app/static/fonts/`).
+
+## Receipt inbox
+
+Upload, phone sharing, selectable receipt interpretation and optional IMAP IDLE intake: see [INBOX.md](INBOX.md). Local extraction also requires Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`); the web Docker image includes it.

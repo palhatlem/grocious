@@ -47,7 +47,7 @@ def candidates(rid):
 
 
 def link(rid, source, target):
-    if source not in archive.SOURCES - {"inbox"}:
+    if not isinstance(source, str) or not isinstance(target, str) or source not in archive.SOURCES - {"inbox"}:
         raise ValueError("Velg en kjedekvittering")
     with store.locked():
         r = archive.read_receipt("inbox", rid)

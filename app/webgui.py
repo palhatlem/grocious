@@ -304,15 +304,19 @@ def api_export(ym, fmt):
                         "discount": round(sum(x["discount"] for x in recs), 2),
                         "total_currency": "NOK", "receipts": recs})
     buf = io.StringIO(); w = csv.writer(buf)
+    extra_fields = ['source', 'archive_id', 'currency', 'category', 'review_state', 'confidence', 'linked_to']
+    def extra(x):
+        return [json.dumps(x.get(k), ensure_ascii=False) if isinstance(x.get(k), (dict, list)) else
+                x.get(k, 'NOK' if k == 'currency' else '') for k in extra_fields]
     if with_lines:
-        w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"])
+        w.writerow(["chain", "receipt_id", "date", "store", "item", "ean", "qty", "amount"] + extra_fields)
         for x in recs:
             for l in x.get("lines", []):
-                w.writerow([x["chain"], x["id"], x["date"], x["store"], l["name"], l["ean"], l["qty"], l["amount"]])
+                w.writerow([x["chain"], x["id"], x["date"], x["store"], l["name"], l["ean"], l["qty"], l["amount"]] + extra(x))
     else:
-        w.writerow(["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"])
+        w.writerow(["chain", "receipt_id", "date", "store", "amount", "bonus", "discount"] + extra_fields)
         for x in recs:
-            w.writerow([x["chain"], x["id"], x["date"], x["store"], x["amount"], x["bonus"], x["discount"]])
+            w.writerow([x["chain"], x["id"], x["date"], x["store"], x["amount"], x["bonus"], x["discount"]] + extra(x))
     return Response(buf.getvalue(), mimetype="text/csv",
                     headers={"Content-Disposition": f"attachment;filename=grocious-{ym}{'-lines' if with_lines else ''}.csv"})
 

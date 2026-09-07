@@ -204,3 +204,44 @@ def test_thumbnail(client, inbox_data):
     assert response.mimetype == "image/jpeg"
     with Image.open(io.BytesIO(response.data)) as preview:
         assert preview.width <= 180 and preview.height <= 240
+
+
+def test_sdk_requests_only_receipt_context(inbox_data, monkeypatch):
+    from inbox import llm
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+    import sys
+    import json
+
+    parsed = {k: None for k in llm.SCHEMA["properties"]}
+    response = SimpleNamespace(
+        status="completed",
+        output_text=json.dumps(parsed),
+        usage=SimpleNamespace(input_tokens=3, output_tokens=4),
+        model_dump=lambda **kwargs: {"output": "fixture"},
+    )
+    create = Mock(return_value=response)
+    constructor = Mock(return_value=SimpleNamespace(responses=SimpleNamespace(create=create)))
+    monkeypatch.setitem(sys.modules, "openai", SimpleNamespace(OpenAI=constructor))
+    result = llm.OpenAI().interpret(text="synthetic receipt", image=[(b"image", "image/jpeg")], mimetype=None, hints={})
+    assert result["parsed"] == parsed
+    request = create.call_args.kwargs
+    assert request["store"] is False and "tools" not in request
+    assert request["text"]["format"]["schema"] == llm.SCHEMA
+    assert request["input"][0]["content"][1]["type"] == "input_image"
+    assert constructor.call_args.kwargs["max_retries"] == 0
+    response = SimpleNamespace(
+        stop_reason="end_turn",
+        content=[SimpleNamespace(type="text", text=json.dumps(parsed))],
+        usage=SimpleNamespace(input_tokens=3, output_tokens=4),
+        model_dump=lambda **kwargs: {"output": "fixture"},
+    )
+    create = Mock(return_value=response)
+    monkeypatch.setitem(
+        sys.modules,
+        "anthropic",
+        SimpleNamespace(Anthropic=Mock(return_value=SimpleNamespace(messages=SimpleNamespace(create=create)))),
+    )
+    llm.Claude().interpret(text="synthetic", image=[(b"image", "image/jpeg")], mimetype=None, hints={})
+    assert create.call_args.kwargs["output_config"]["format"]["schema"] == llm.SCHEMA
+    assert create.call_args.kwargs["messages"][0]["content"][1]["source"]["media_type"] == "image/jpeg"
