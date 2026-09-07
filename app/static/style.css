@@ -165,3 +165,4 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .inbox-upload { display: grid; grid-template-columns: minmax(0, 1fr) 100px; align-items: center; width: min(100%, 600px); }
 .inbox-upload label { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
 .inbox-upload input { max-width: 100%; min-width: 0; }
+#receipt-sort { margin-left: auto; max-width: 100%; }

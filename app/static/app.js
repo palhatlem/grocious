@@ -50,6 +50,22 @@
       b.classList.add("on"); chain = b.dataset.chain || ""; page = 0; applyFilters();
     });
   });
+  var sortSel = document.getElementById("receipt-sort");
+  if (sortSel) sortSel.addEventListener("change", function () {
+    var parts = sortSel.value.split("-"), key = parts[0], direction = parts[1] === "asc" ? 1 : -1;
+    items.sort(function (a, b) {
+      var x = a.dataset[key], y = b.dataset[key], cmp;
+      var absentX = x == null || x === "", absentY = y == null || y === "";
+      if (absentX !== absentY) return absentX ? 1 : -1;
+      if (absentX) cmp = 0;
+      else if (key === "store") cmp = x.localeCompare(y, "nb", {sensitivity: "base", numeric: true});
+      else if (key === "date") cmp = x.localeCompare(y);
+      else cmp = Number(x) - Number(y);
+      return cmp * direction || b.dataset.date.localeCompare(a.dataset.date);
+    });
+    items.forEach(function (li) { list.appendChild(li); });
+    page = 0; applyFilters();
+  });
   var monthSel = document.getElementById("month");
   if (monthSel) monthSel.addEventListener("change", function () { month = monthSel.value; page = 0; applyFilters(); });
   if (prev) prev.addEventListener("click", function () { page--; applyFilters(); document.getElementById("receipts").scrollIntoView(); });
