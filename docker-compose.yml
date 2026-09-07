@@ -15,7 +15,7 @@ services:
     build: .
     image: grocery-fetch:latest
     container_name: grocery-rema-fetch
-    command: ["rema_client.py"]        # fetches + AUTO-ACTIVATES all available offers
+    command: ["rema_client.py"]        # fetches receipts/offers; activation is explicitly opt-in
     env_file: ${GROCIOUS_HOME:-.}/.env
     environment: [REMA_DATA=/data, TZ=Europe/Oslo]
     volumes: ["${GROCIOUS_HOME:-.}/data:/data"]
