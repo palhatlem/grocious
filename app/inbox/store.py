@@ -11,6 +11,7 @@ from decimal import Decimal
 import receipt_archive as archive
 from .extract import extract
 from .payment import normalize as normalize_payment
+from . import mail_identity
 from .heuristics import CATEGORIES, MONEY, RULES_VERSION, money, parse
 
 
@@ -128,6 +129,9 @@ def validate(record):
 
 def overlay(record, directory):
     record = dict(record)
+    variants = directory / "mail-variants.json"
+    if variants.exists():
+        record["documents"] = list(record.get("documents") or []) + json.loads(variants.read_text())
     active = directory / "active.json"
     if active.exists():
         pointer = json.loads(active.read_text())
@@ -167,11 +171,23 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
     directory = archive.folder("inbox", rid)
     path = directory / "receipt.json"
     extracted = None
+    identity = (
+        mail_identity.identify(data) if mimetype == "message/rfc822" or filename.lower().endswith(".eml") else None
+    )
+    duplicate_reason = "content_hash"
     with locked():
         duplicate = path.exists()
-    if not duplicate:
+    if not duplicate or identity:
         extracted = extract(data, filename, mimetype)
     with locked():
+        existing = mail_identity.lookup(identity)
+        if existing:
+            if existing != rid:
+                duplicate_reason = "message_id_and_payload"
+            rid = existing
+            directory = archive.folder("inbox", rid)
+            path = directory / "receipt.json"
+            mail_identity.preserve_variant(directory, data)
         duplicate = path.exists()
         if not duplicate:
             documents = [
@@ -211,6 +227,7 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
                     "received_at": now(),
                     "filename": Path(filename).name,
                     "mimetype": extracted["mimetype"],
+                    **({"message_id": identity["message_id"]} if identity else {}),
                 },
                 extraction=dict(
                     kind=extracted["kind"],
@@ -230,6 +247,10 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
             )
             record["validation"] = validate(record)
             archive.atomic_json(path, record)
+            if identity:
+                archive.atomic_json(directory / "mail-identity.json", identity)
+            archive.rebuild("inbox")
+        elif existing:
             archive.rebuild("inbox")
     # Retry attachment ingestion even after a partial prior mail ingestion.
     if extracted is None and (mimetype == "message/rfc822" or filename.lower().endswith(".eml")):
@@ -258,6 +279,7 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
         state=archive.read_receipt("inbox", rid)["review"]["state"],
         duplicate=duplicate,
         duplicate_of_self=duplicate,
+        duplicate_reason=duplicate_reason if duplicate else None,
         children=children,
     )
 

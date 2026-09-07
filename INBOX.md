@@ -137,3 +137,21 @@ does not confirm that a model read the source correctly; the receipt remains sub
 Prompt `interpret-v3` distinguishes physical terminal identifiers and authorisation codes from PSP
 references and processor names. Other references go in `interpretation_notes`, retained in the receipt,
 exports and review UI. Existing interpretations are preserved; the new prompt applies to future runs.
+
+## Replayed email deliveries
+
+EML intake deduplicates a repeated Message-ID only when its sender/date/recipient/subject, rendered
+body text and decoded attachments/inline images also match. This tolerates transport-header, MIME-boundary
+and HTML-presentation changes. Changed body text or attachment bytes still produce a separate record;
+mail without Message-ID retains byte-hash deduplication only.
+
+The first archived matching EML remains the canonical receipt ID. Different raw deliveries are preserved
+as additional immutable `email` documents through `mail-variants.json`; the baseline `receipt.json` is
+untouched. `duplicate_reason=message_id_and_payload` distinguishes these from byte-identical retries.
+The existing inbox write lock serializes lookup and creation across web/mail intake. Cached identities
+for older EML receipts are derived lazily from their originals. A retry still attempts unfinished attachment
+intake before the worker moves it to Done; it never resets review status or auto-interprets the parent again.
+
+This prevents future replay duplicates; it does not merge already-created duplicates or treat an email,
+an invoice attachment and a receipt attachment as one purchase. Those distinct documents still require
+review to avoid treating multiple documents for the same purchase as multiple expenses.
