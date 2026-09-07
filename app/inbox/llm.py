@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Protocol
 
 from . import store
-from .heuristics import parse
+from .heuristics import parse, RULES_VERSION
 import receipt_archive as archive
 
 HERE = Path(__file__).parent
@@ -26,11 +26,11 @@ class Provider(Protocol):
 
 
 class Rules:
-    id, label, vision, model = "none", "Regler", False, "rules-1"
+    id, label, vision, model = "none", "Regler", False, RULES_VERSION
     available = True
 
     def interpret(self, *, text, image, mimetype, hints):
-        return dict(parsed=parse(text or ""), raw={}, input_tokens=0, output_tokens=0)
+        return dict(parsed=parse(text or "", hints=hints), raw={}, input_tokens=0, output_tokens=0)
 
 
 class OpenAI:
@@ -252,7 +252,7 @@ def run(rid, provider_id, model=None):
     metadata = dict(
         provider=provider_id,
         model=provider.model,
-        prompt_version="interpret-v2" if provider_id != "none" else "rules-1",
+        prompt_version="interpret-v2" if provider_id != "none" else RULES_VERSION,
         ran_at=store.now(),
         latency_ms=round((time.monotonic() - started) * 1000),
         input_tokens=result["input_tokens"],

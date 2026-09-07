@@ -27,6 +27,7 @@ def parse(text):
     if method:
         result["method"] = method[1]
     suffixes = set(re.findall(r"(?:\*|[xX•]){2,}[\s*-]*(\d{4})(?!\d)", text))
+    suffixes.update(re.findall(r"\b(?:Visa|Mastercard|BankAxept|kort|card)\s*[-:]\s*(\d{4})(?!\d)", text, re.I))
     if len(suffixes) == 1:
         result["card_last4"] = suffixes.pop()
     for field, label in [

@@ -107,3 +107,19 @@ so this cannot recover precision already lost upstream. `total_minor` is an inte
 An endpoint regression test excludes linked/discarded rows in both JSON and CSV, including when the
 index is stale but the current review overlay has changed. `/api/archive/inbox` keeps the shared archive
 response shape with document checksums and roles.
+
+## Rule parser formats
+
+`rules-2` accepts html2text table separators, labelled purchase/payment dates inside prose, and English
+month names. Purchase/payment labels take precedence over forwarding, invoice or due dates. Conflicting
+unlabelled dates and dates without a year remain unknown. Totals accept currency codes and symbols before
+or after the amount, including decimal-point amounts and grouped amounts such as `1,234.56` / `1.234,56`.
+An explicit currency code takes precedence over a bare dollar sign; without a code `$` defaults to USD
+and `kr` to NOK, so verify the currency on international receipts during review.
+
+Merchant hints can come from a recognised heading, an explicit `Receipt from` label or a sender domain;
+common forwarding-mailbox and payment-processor domains are excluded. These are low-confidence hints,
+not authenticated merchant identities. Rules also read an explicitly labelled four-digit card reference
+such as `Visa - 1234`, in addition to masked card numbers. Full multi-column item/tax reconstruction is
+not guaranteed. Use the **Regler** button to append a fresh interpretation of an existing receipt after
+upgrading. Originals and the initial parse stay unchanged; any user corrections continue to take precedence.

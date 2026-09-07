@@ -10,7 +10,7 @@ from pathlib import Path
 import receipt_archive as archive
 from .extract import extract
 from .payment import normalize as normalize_payment
-from .heuristics import CATEGORIES, money, parse
+from .heuristics import CATEGORIES, MONEY, RULES_VERSION, money, parse
 
 
 def now():
@@ -109,7 +109,7 @@ def overlay(record, directory):
         import re
 
         values = set()
-        for v in re.findall(r"(?<![\d.])-?\d[\d ]*[,.]\d{2}(?![\d.])", record["document_text"]):
+        for v in re.findall(r"(?<![\d.,])" + MONEY + r"(?![\d.,])", record["document_text"]):
             try:
                 values.add(money(v))
             except ValueError:
@@ -148,7 +148,7 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
             text = extracted["text"]
             if text:
                 documents.append(archive.original(directory, "derived", text.encode(), "txt", "text/plain"))
-            parsed = parse(text)
+            parsed = parse(text, hints=intake)
             record = dict(
                 schema_version=1,
                 parser_version="inbox-1",
@@ -179,7 +179,11 @@ def ingest(data, filename="receipt.txt", mimetype="text/plain", intake=None, dep
                     text_sha256=hashlib.sha256(text.encode()).hexdigest(),
                 ),
                 interpretation=dict(
-                    provider="none", model=None, prompt_version="rules-1", confidence=parsed["confidence"], ran_at=now()
+                    provider="none",
+                    model=None,
+                    prompt_version=RULES_VERSION,
+                    confidence=parsed["confidence"],
+                    ran_at=now(),
                 ),
                 review=dict(state="needs_review", by=None, at=None),
                 **normalize(parsed),
