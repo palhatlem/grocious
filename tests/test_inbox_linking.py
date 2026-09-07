@@ -64,7 +64,7 @@ def test_link_graph_guards(pair):
     with pytest.raises(ValueError):
         linking.link(mail, "inbox", mail)
     store.state(invoice, "discarded")
-    assert not linking.candidates(mail)
+    assert linking.candidates(mail)[0]["review"]["state"] == "discarded"
     with pytest.raises(ValueError):
         linking.link(mail, "inbox", invoice)
     store.state(invoice, "needs_review")
@@ -86,3 +86,25 @@ def test_parent_candidates_without_date_or_amount(pair):
     candidates = linking.candidates(mail)
     assert len(candidates) == 1
     assert candidates[0]["archive_id"] == invoice and candidates[0]["related"]
+
+
+def test_discarded_candidate_only_attaches_to_active_primary(client, pair):
+    mail, invoice = pair
+    store.state(mail, "discarded")
+    before = archive.read_receipt("inbox", invoice)
+    page = client.get("/inbox/" + invoice)
+    assert page.status_code == 200
+    assert "Forkastet post" in page.text
+    assert "Koblingen kan foreløpig ikke angres" in page.text
+    assert "Bruk kandidaten som hovedpost" not in page.text
+    assert "Behold denne posten, legg kandidaten ved" in page.text
+    with pytest.raises(ValueError):
+        linking.link(invoice, "inbox", mail)
+    response = client.post("/inbox/" + mail + "/link", data={"source": "inbox", "target": invoice})
+    assert response.status_code == 303
+    after = archive.read_receipt("inbox", invoice)
+    assert after["review"] == before["review"]
+    assert after["amount_minor"] == before["amount_minor"]
+    assert after["linked_from"] == [mail]
+    assert archive.read_receipt("inbox", mail)["review"]["state"] == "linked"
+    assert [r["archive_id"] for r in store.exports("2026-09")] == [invoice]

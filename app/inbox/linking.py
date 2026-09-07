@@ -23,7 +23,7 @@ def candidates(rid):
                     continue
                 # Read current review overlays; an index can lag behind a link/discard.
                 candidate = archive.read_receipt("inbox", candidate["archive_id"])
-                if candidate.get("review", {}).get("state") in ("linked", "discarded"):
+                if candidate.get("review", {}).get("state") == "linked":
                     continue
                 other_parent = candidate.get("intake", {}).get("parent")
                 related = candidate["archive_id"] == parent or other_parent == rid

@@ -80,7 +80,8 @@ the primary and its ZIP download. Parent email/attachment relationships appear a
 without parsed amounts; matching dates/amounts also suggest candidates. Suggestions never link automatically.
 The review page warns when both inbox candidates are already confirmed and lets the user choose the
 direction. Self-links, linked/discarded targets and moving a primary that already has linked documents
-are rejected. There is currently no unlink UI.
+are rejected. Discarded inbox candidates may be attached to an active primary but never chosen as the primary.
+There is currently no unlink UI; this is stated beside the linking controls.
 
 Email intake still creates separate attachment candidates. A single email may contain several purchases;
 grouped intake with selectable interpretation sources and a split action is not implemented yet.
