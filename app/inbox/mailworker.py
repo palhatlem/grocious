@@ -4,6 +4,7 @@ import logging
 import os
 import ssl
 import time
+import traceback
 from email import policy
 from email.parser import BytesParser
 from email.utils import parseaddr
@@ -61,13 +62,16 @@ def session():
         if security == "starttls":
             client.starttls(context)
         client.login(os.environ["IMAP_USER"], os.environ["IMAP_PASSWORD"])
+        # Bridge may return no match for LIST of an exact name despite listing it in LIST *.
+        existing = {name for _, _, name in client.list_folders()}
         for folder in (
             os.getenv("IMAP_FOLDER", "Grocious/Inbox"),
             os.getenv("IMAP_DONE", "Grocious/Done"),
             os.getenv("IMAP_FAILED", "Grocious/Failed"),
         ):
-            if not client.folder_exists(folder):
+            if folder not in existing:
                 client.create_folder(folder)
+                existing.add(folder)
         client.select_folder(os.getenv("IMAP_FOLDER", "Grocious/Inbox"))
         status(connected=True, last_seen=store.now())
         while True:
@@ -85,6 +89,16 @@ def session():
             status(connected=True, last_seen=store.now())
 
 
+def failure_trace():
+    """Keep exception type, reason and stack while redacting configured credentials."""
+    detail = traceback.format_exc()
+    for key in ("IMAP_PASSWORD", "IMAP_USER", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GROCIOUS_LLM_LITELLM_KEY"):
+        value = os.getenv(key)
+        if value:
+            detail = detail.replace(value, "[redacted]")
+    return detail
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
     failures = 0
@@ -95,7 +109,7 @@ def main():
         except Exception:
             failures += 1
             status(connected=False, errors=failures, last_seen=store.now())
-            log.warning("IMAP disconnected; reconnecting (attempt %d)", failures)
+            log.warning("IMAP disconnected; reconnecting (attempt %d)\n%s", failures, failure_trace())
             time.sleep(min(300, 2 ** min(failures, 8)))
 
 

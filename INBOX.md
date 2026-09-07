@@ -46,7 +46,14 @@ The Bridge host must be reachable from this container: configure networking in a
 if the Bridge listens on host loopback. Do not expose Bridge externally. Configure TLS verification for
 the actual Bridge certificate; verification defaults on. IMAP IDLE requires server MOVE support.
 
-Create a mail filter routing receipts into `Grocious/Inbox`. Successful messages move to `Grocious/Done`
+For Proton Bridge, custom folders are exposed with the `Folders/` prefix. Configure
+`IMAP_FOLDER=Folders/Grocious/Inbox`, `IMAP_DONE=Folders/Grocious/Done`, and
+`IMAP_FAILED=Folders/Grocious/Failed`; the shorter generic defaults are not the Bridge mailbox names.
+Use the exact mailbox names returned by IMAP LIST. The worker lists all mailboxes and compares names,
+because Bridge can return an empty result for an exact-name LIST even when the mailbox exists.
+Reconnect logs include the exception reason and stack, with configured credentials redacted.
+
+Create a mail filter routing receipts into the corresponding Grocious Inbox folder. Successful messages move to `Grocious/Done`
 only after ingestion of all attachments. Invalid messages remain in `Grocious/Failed`; originals are not
 deleted. `mail_status.json` supplies connection and last-ingestion status. Reconnect uses backoff;
 IDLE is renewed at most every 25 minutes. No timer or cron is installed.
