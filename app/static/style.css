@@ -166,3 +166,17 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .inbox-upload label { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
 .inbox-upload input { max-width: 100%; min-width: 0; }
 #receipt-sort { margin-left: auto; max-width: 100%; }
+
+.settings-menu { position: relative; }
+.settings-menu > summary { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 9px; color: var(--mut); cursor: pointer; list-style: none; }
+.settings-menu > summary::-webkit-details-marker { display: none; }
+.settings-menu[open] > summary, .settings-menu > summary:hover { background: var(--card2); color: var(--fg); }
+.settings-popover { position: absolute; right: 0; top: calc(100% + 8px); width: 230px; max-width: calc(100vw - 24px); padding: 16px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px var(--shadow); z-index: 10; }
+.settings-label { display: block; font-size: .85rem; color: var(--mut); margin-bottom: 6px; }
+.settings-popover .theme-pick { width: 100%; }
+.settings-popover select { width: 100%; min-width: 0; }
+.sort-pick { display: inline-flex; align-items: center; gap: 7px; margin-left: auto; background: var(--card2); color: var(--mut); border: 1px solid var(--line); border-radius: 8px; padding: 6px 9px; max-width: 100%; }
+.sort-pick #receipt-sort { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: var(--fg); font: inherit; font-size: .9rem; margin: 0; padding: 0; min-width: 0; cursor: pointer; }
+.sort-pick option, .theme-pick option { background: var(--card); color: var(--fg); }
+.sort-pick:focus-within, .settings-menu > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.select-caret { pointer-events: none; line-height: 1; }

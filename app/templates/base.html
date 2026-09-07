@@ -20,6 +20,9 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
   <div class="meta">
     <a href="/inbox">Innboks</a>
     {% if demo %}<span class="chip demo" title="GROCIOUS_DEMO=1: anonymiserte fixtures, ingen ekte tokens">DEMO</span>{% endif %}
+    <details class="settings-menu">
+      <summary aria-label="Innstillinger" title="Innstillinger"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--card)"/><circle cx="15" cy="17" r="3" fill="var(--card)"/></svg></summary>
+      <div class="settings-popover"><h2>Innstillinger</h2><label for="theme" class="settings-label">Utseende</label>
     <label class="theme-pick" title="Tema (husk i nettleseren)">
       <span class="ico" aria-hidden="true">◐</span>
       <select id="theme" aria-label="Tema">
@@ -27,6 +30,8 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
         {% for th in themes %}<option value="{{ th.id }}">{{ th.label }}</option>{% endfor %}
       </select>
     </label>
+      </div>
+    </details>
   </div>
 </header>
 <main class="wrap">

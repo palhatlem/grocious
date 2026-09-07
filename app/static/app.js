@@ -19,6 +19,14 @@
     sel.addEventListener("change", function () { applyTheme(sel.value); });
   }
 
+  var settings = document.querySelector(".settings-menu");
+  if (settings) {
+    document.addEventListener("click", function (e) { if (!settings.contains(e.target)) settings.open = false; });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && settings.open) { settings.open = false; settings.querySelector("summary").focus(); }
+    });
+  }
+
   // ---- filters ----------------------------------------------------------
   var nokFmt = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function nok(x) { return nokFmt.format(x) + " kr"; }

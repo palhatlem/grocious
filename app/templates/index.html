@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="panel"><details><summary>Andre kvitteringer · {{ inbox.month_count }} denne måneden{% if inbox.needs_review %} · {{ inbox.needs_review }} til gjennomgang{% endif %}</summary><p>{% for currency,total in inbox.totals.items() %}{{ total|nok(2) }} {{ currency }}{% if not loop.last %} · {% endif %}{% else %}Ingen beløp denne måneden{% endfor %}</p><a class="btn" href="/inbox">Åpne innboks</a></details></section>
+
 <section class="stats">
   {% for stat in stats %}
   <div class="stat {{ stat.source }}">
@@ -37,8 +37,14 @@
   {% endfor %}
 </section>
 
+<details class="panel offers-panel other-receipts">
+  <summary><h2>Andre kvitteringer <span class="pill">{{ inbox.month_count }} denne måneden{% if inbox.needs_review %} · {{ inbox.needs_review }} til gjennomgang{% endif %}</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
+  <p>{% for currency,total in inbox.totals.items() %}{{ total|num(2) }} {{ currency }}{% if not loop.last %} · {% endif %}{% else %}Ingen beløp denne måneden{% endfor %}</p>
+  <a class="btn" href="/inbox">Åpne innboks</a>
+</details>
+
 <details class="panel offers-panel">
-  <summary><h2>Tilbud &amp; kuponger <span class="pill">aktiver de du vil selv</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
+  <summary><h2>Tilbud &amp; kuponger</h2><span class="caret" aria-hidden="true">▸</span></summary>
   <div class="offers">
     {% for o in offer_cards %}
     <article class="offer" data-offer-id="{{ o.source }}:{{ o.id }}">
@@ -71,12 +77,14 @@
       {% for m in months %}<option value="{{ m.ym }}">{{ m.label }}</option>{% endfor %}
     </select>
     <span class="count mut small" id="count"></span>
+    <label class="sort-pick" title="Sorter kvitteringer">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h11M4 18h6"/></svg>
     <select id="receipt-sort" aria-label="Sorter kvitteringer">
       <option value="date-desc">Dato · nyeste først</option><option value="date-asc">Dato · eldste først</option>
       <option value="store-asc">Butikk · A–Å</option><option value="store-desc">Butikk · Å–A</option>
       <option value="amount-desc">Beløp · høyest først</option><option value="amount-asc">Beløp · lavest først</option>
       <option value="bonus-desc">Bonus · høyest først</option><option value="discount-desc">Rabatt · høyest først</option>
-    </select>
+    </select><span class="select-caret" aria-hidden="true">⌄</span></label>
   </div>
   <div class="totals small mut" id="totals"></div>
   <ul class="receipts" id="list">
