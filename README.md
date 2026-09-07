@@ -89,6 +89,10 @@ place and filter per chain and month. `app/ui.py` handles Norwegian formatting (
 the base scheme) and restart, and it appears in the picker. The picker remembers the choice
 in `localStorage`, «Auto» follows `prefers-color-scheme`, and `?theme=<id>` forces one.
 
+## Receipt inbox
+
+Upload, phone sharing, selectable receipt interpretation and optional IMAP IDLE intake: see [INBOX.md](INBOX.md). Local extraction also requires Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`); the web Docker image includes it.
+
 ## Running it
 
 ```bash
@@ -169,7 +173,3 @@ services, must stay open under the AGPL. No taking this private to monetise groc
 
 The wordmark uses locally hosted [Space Grotesk](https://github.com/floriankarsten/space-grotesk),
 licensed under the SIL Open Font License (included in `app/static/fonts/`).
-
-## Receipt inbox
-
-Upload, phone sharing, selectable receipt interpretation and optional IMAP IDLE intake: see [INBOX.md](INBOX.md). Local extraction also requires Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`); the web Docker image includes it.
