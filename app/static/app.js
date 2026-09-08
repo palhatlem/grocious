@@ -27,11 +27,25 @@
     });
   }
 
+  var otherRows = Array.prototype.slice.call(document.querySelectorAll("#other-receipt-list > .receipt"));
+  var otherPage = 0, otherPrev = document.getElementById("other-prev"), otherNext = document.getElementById("other-next");
+  function showOtherPage() {
+    otherRows.forEach(function (row, i) { row.hidden = i < otherPage * 20 || i >= (otherPage + 1) * 20; });
+    if (!otherPrev || !otherNext) return;
+    otherPrev.hidden = otherPage === 0;
+    otherNext.hidden = (otherPage + 1) * 20 >= otherRows.length;
+    document.getElementById("other-page").textContent = otherRows.length ?
+      (otherPage * 20 + 1) + "–" + Math.min((otherPage + 1) * 20, otherRows.length) + " av " + otherRows.length : "";
+  }
+  if (otherPrev) otherPrev.addEventListener("click", function () { otherPage = Math.max(0, otherPage - 1); showOtherPage(); });
+  if (otherNext) otherNext.addEventListener("click", function () { otherPage++; showOtherPage(); });
+  showOtherPage();
+
   // ---- filters ----------------------------------------------------------
   var nokFmt = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   function nok(x) { return nokFmt.format(x) + " kr"; }
   var chain = "", month = "", page = 0, pageSize = 50;
-  var items = Array.prototype.slice.call(document.querySelectorAll(".receipt"));
+  var items = Array.prototype.slice.call(document.querySelectorAll("#list > .receipt"));
   items.sort(function (a, b) { return b.dataset.date.localeCompare(a.dataset.date); });
   var list = document.getElementById("list");
   items.forEach(function (li) { list.appendChild(li); });

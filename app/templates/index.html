@@ -37,12 +37,6 @@
   {% endfor %}
 </section>
 
-<details class="panel offers-panel other-receipts">
-  <summary><h2>Andre kvitteringer <span class="pill">{{ inbox.month_count }} denne måneden{% if inbox.needs_review %} · {{ inbox.needs_review }} til gjennomgang{% endif %}</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
-  <p>{% for currency,total in inbox.totals.items() %}{{ total|num(2) }} {{ currency }}{% if not loop.last %} · {% endif %}{% else %}Ingen beløp denne måneden{% endfor %}</p>
-  <a class="btn" href="/inbox">Åpne innboks</a>
-</details>
-
 <details class="panel offers-panel">
   <summary><h2>Tilbud &amp; kuponger</h2><span class="caret" aria-hidden="true">▸</span></summary>
   <div class="offers">
@@ -61,6 +55,30 @@
     {% if c.offers_error %}<p class="mut">{{ c.offers_error }}</p>{% endif %}
     <button type="button" class="btn" id="offers-reset" hidden>Vis skjulte tilbud igjen</button>
   </div>
+</details>
+
+<details class="panel offers-panel other-receipts" id="other-receipts">
+  <summary><h2>Andre kvitteringer <span class="pill">{{ inbox_rows|length }}{% if inbox.needs_review %} · {{ inbox.needs_review }} til gjennomgang{% endif %}</span></h2><span class="caret" aria-hidden="true">▸</span></summary>
+  <ul class="receipts" id="other-receipt-list">
+    {% for x in inbox_rows %}
+    <li class="receipt"{% if loop.index > 20 %} hidden{% endif %}>
+      <a class="head" href="/inbox/{{ x.archive_id }}">
+        <span class="badge">Innboks</span>
+        <span class="store">{{ x.store or x.intake.filename or 'Ukjent butikk' }}</span>
+        <span class="date">{{ x.date|day if x.date else 'Ukjent dato' }}</span>
+        <span class="amt" data-num>{{ x.amount|num(2) if x.amount is not none else '—' }} {{ x.currency or '' }}</span>
+        <span class="extra mut">{{ 'Bekreftet' if x.review.state == 'confirmed' else 'Til gjennomgang' }}</span>
+        <span class="caret" aria-hidden="true">›</span>
+      </a>
+    </li>
+    {% else %}<li class="mut small">Ingen kvitteringer lagt inn ennå.</li>{% endfor %}
+  </ul>
+  <nav class="receipt-pages" aria-label="Sider for andre kvitteringer"{% if inbox_rows|length <= 20 %} hidden{% endif %}>
+    <button class="btn" id="other-prev" type="button" hidden>← Forrige 20</button>
+    <span id="other-page" aria-live="polite"></span>
+    <button class="btn" id="other-next" type="button"{% if inbox_rows|length <= 20 %} hidden{% endif %}>Neste 20 →</button>
+  </nav>
+  <a class="btn" href="/inbox">Åpne innboks / legg til kvittering</a>
 </details>
 
 <section class="panel" id="receipts">

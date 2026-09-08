@@ -211,8 +211,12 @@ def coop_dashboard():
 
 @app.route("/")
 def index():
+    inbox_rows = sorted(
+        (x for x in receipt_archive.summary("inbox")["receipts"] if x.get("review", {}).get("state") not in ("linked", "discarded")),
+        key=lambda x: x.get("intake", {}).get("received_at", ""), reverse=True,
+    )
     t, r, c = trumf_data(), rema_data(), coop_dashboard()
-    return render_template("index.html", t=t, r=r, c=c, offer_cards=[o for source, data in [("rema",r),("trumf",t),("coop",c)] for o in offer_ui.cards(source,data.get("offers"))], stats=dashboard_stats.cards(t,r,c), inbox=inbox_store.summary(), demo=DEMO, **ui.context(t, r, c))
+    return render_template("index.html", t=t, r=r, c=c, offer_cards=[o for source, data in [("rema",r),("trumf",t),("coop",c)] for o in offer_ui.cards(source,data.get("offers"))], stats=dashboard_stats.cards(t,r,c), inbox=inbox_store.summary(), inbox_rows=inbox_rows, demo=DEMO, **ui.context(t, r, c))
 
 @app.get("/offers/<source>/<oid>")
 def offer_detail(source, oid):

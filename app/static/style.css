@@ -180,3 +180,5 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .sort-pick option, .theme-pick option { background: var(--card); color: var(--fg); }
 .sort-pick:focus-within, .settings-menu > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .select-caret { pointer-events: none; line-height: 1; }
+.other-receipts .head { text-decoration: none; }
+.other-receipts .receipt-pages[hidden] { display: none; }
