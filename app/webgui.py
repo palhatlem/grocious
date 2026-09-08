@@ -6,6 +6,7 @@ import json, os, io, csv, re, uuid, datetime, functools
 import requests
 from flask import Flask, Response, render_template, redirect, abort, request, jsonify, send_file
 import receipt_archive
+import navigation
 from inbox import store as inbox_store
 from inbox.routes import bp as inbox_bp
 import demo, themes, ui, dashboard_stats, bonus_sources, offers as offer_ui
@@ -17,6 +18,12 @@ if DEMO and "GROCERY_DATA" not in os.environ:  # demo archive (Coop) lives with 
     os.environ["GROCERY_DATA"] = str(demo.FIXTURES / "data")
 app = Flask(__name__, template_folder="templates", static_folder="static")
 app.jinja_env.filters.update(ui.FILTERS)
+app.register_blueprint(navigation.bp)
+
+@app.context_processor
+def navigation_context():
+    return {"navigation": navigation.load()}
+
 
 def _cache(ttl):
     def deco(fn):

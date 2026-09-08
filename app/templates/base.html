@@ -35,10 +35,21 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
         {% for th in themes %}<option value="{{ th.id }}">{{ th.label }}</option>{% endfor %}
       </select>
     </label>
+        <form id="navigation-settings" class="navigation-settings">
+          <h3>Lenkeliste</h3>
+          <label class="navigation-toggle"><input id="navigation-enabled" type="checkbox"{{ ' checked' if navigation.enabled }}> Vis under tittellinja</label>
+          <div id="navigation-editor"></div>
+          <div class="navigation-actions"><button class="btn" id="navigation-add" type="button">Legg til lenke</button><button class="btn" type="submit">Lagre</button></div>
+          <p id="navigation-status" class="mut small" role="status"></p>
+        </form>
       </div>
     </details>
   </div>
 </header>
+<nav class="quick-links" id="quick-links" aria-label="Dine lenker"{% if not navigation.enabled or not navigation.links %} hidden{% endif %}>
+{% for link in navigation.links %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>{% endfor %}
+</nav>
+<script type="application/json" id="navigation-data">{{ navigation|tojson }}</script>
 <main class="wrap">
 {% block content %}{% endblock %}
 </main>
@@ -47,6 +58,7 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
   <span class="links"><a href="/api/summary">api/summary</a>{% if current_month %} · <a href="/api/export/{{ current_month }}.csv">eksport {{ current_month }}</a>{% endif %}</span>
 </footer>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="{{ url_for('static', filename='navigation.js') }}"></script>
 <script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});</script>
 </body>
 </html>

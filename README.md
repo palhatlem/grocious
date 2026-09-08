@@ -79,6 +79,11 @@ change), so a second `?lines=1` export is fast.
 
 ## Web UI
 
+The settings menu includes an optional navigation bar below the header. Add display
+names and HTTP(S) URLs, edit or remove links, and toggle the bar on/off. Settings
+are shared across devices and stored in `GROCERY_DATA/navigation.json`; fresh
+installations have no predefined links. Links open in a new tab.
+
 Flask, server-rendered Jinja, no CDN and no JS framework. Mobile first: receipts expand in
 place and filter per chain and month, with 50 receipts per page (newest first). Offer dismissal
 is remembered in this browser and can be reset with “Vis skjulte tilbud igjen”. Trumf campaign
