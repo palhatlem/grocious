@@ -4,7 +4,7 @@
 <p><a href="/inbox">← Innboks</a></p>
 <div class="inbox-review">
 <section class="panel"><h2>Original</h2>
-{% if images %}{% for d in images %}<a href="/inbox/{{ r.archive_id }}/file/{{ d.filename }}"><img class="receipt-img" alt="Kvitteringsbilde" src="/inbox/{{ r.archive_id }}/file/{{ d.filename }}"></a>{% endfor %}
+{% if images %}{% for d in images %}<a href="/inbox/{{ r.archive_id }}/file/{{ d.filename }}"><img class="receipt-img" alt="Kvitteringsbilde" src="/inbox/{{ r.archive_id }}/file/{{ d.preview_filename or d.filename }}"></a>{% endfor %}
 {% elif pdf %}<iframe title="Original PDF" class="inbox-pdf" src="/inbox/{{ r.archive_id }}/file/{{ pdf.filename }}"></iframe>
 {% else %}<pre class="inbox-text">{{ r.document_text or 'Ingen tekst hentet ut.' }}</pre>{% endif %}
 <ul>{% for d in r.documents %}<li><a href="/inbox/{{ r.archive_id }}/file/{{ d.filename }}">{{ d.role }} · {{ d.mimetype }}</a></li>{% endfor %}</ul>

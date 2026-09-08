@@ -107,6 +107,12 @@ def queue():
 def detail(rid):
     r = record(rid)
     images = [d for d in r["documents"] if d["mimetype"] in ("image/jpeg", "image/png", "image/webp")]
+    originals = [d for d in images if d.get("role") != "derived"]
+    previews = [d for d in images if d.get("role") == "derived"]
+    if len(originals) == 1 and len(previews) == 1:
+        images = [dict(originals[0], preview_filename=previews[0]["filename"])]
+    else:
+        images = originals or previews
     pdf = next((d for d in r["documents"] if d["mimetype"] == "application/pdf"), None)
     return render_template(
         "inbox_detail.html",
