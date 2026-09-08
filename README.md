@@ -79,7 +79,7 @@ change), so a second `?lines=1` export is fast.
 
 ## Web UI
 
-The settings menu includes an optional navigation bar below the header. Add display
+The settings menu includes an optional navigation bar in the header. Add display
 names and HTTP(S) URLs, edit or remove links, and toggle the bar on/off. Settings
 are shared across devices and stored in `GROCERY_DATA/navigation.json`; fresh
 installations have no predefined links. Links open in a new tab.

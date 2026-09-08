@@ -21,7 +21,9 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
 <body>
 <header class="top">
   <a class="brand" href="/" aria-label="grocious"><span class="brand-logo" role="img" aria-label="grocious"></span></a>
-  <span class="tagline">kvitteringer · bonus · oversikt</span>
+<nav class="quick-links" id="quick-links" aria-label="Dine lenker"{% if not navigation.enabled or not navigation.links %} hidden{% endif %}>
+{% for link in navigation.links %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>{% endfor %}
+</nav>
   <div class="meta">
     <a href="/inbox">Innboks</a>
     {% if demo %}<span class="chip demo" title="GROCIOUS_DEMO=1: anonymiserte fixtures, ingen ekte tokens">DEMO</span>{% endif %}
@@ -37,7 +39,7 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
     </label>
         <form id="navigation-settings" class="navigation-settings">
           <h3>Lenkeliste</h3>
-          <label class="navigation-toggle"><input id="navigation-enabled" type="checkbox"{{ ' checked' if navigation.enabled }}> Vis under tittellinja</label>
+          <label class="navigation-toggle"><input id="navigation-enabled" type="checkbox"{{ ' checked' if navigation.enabled }}> Vis lenker i toppfeltet</label>
           <div id="navigation-editor"></div>
           <div class="navigation-actions"><button class="btn" id="navigation-add" type="button">Legg til lenke</button><button class="btn" type="submit">Lagre</button></div>
           <p id="navigation-status" class="mut small" role="status"></p>
@@ -46,9 +48,7 @@ try { var th = localStorage.getItem("grocious.theme"); if (th && th !== "auto") 
     </details>
   </div>
 </header>
-<nav class="quick-links" id="quick-links" aria-label="Dine lenker"{% if not navigation.enabled or not navigation.links %} hidden{% endif %}>
-{% for link in navigation.links %}<a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>{% endfor %}
-</nav>
+
 <script type="application/json" id="navigation-data">{{ navigation|tojson }}</script>
 <main class="wrap">
 {% block content %}{% endblock %}
