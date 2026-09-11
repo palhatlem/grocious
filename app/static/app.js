@@ -133,15 +133,16 @@
 
   // ---- expandable line items -------------------------------------------
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function render(box, lines) {
+  function render(box, lines, currency) {
+    function money(value) { return nokFmt.format(value) + " " + (currency === "NOK" ? "kr" : currency || ""); }
     if (!lines.length) { box.innerHTML = '<p class="mut small">Ingen varelinjer.</p>'; return; }
     var tot = 0, rows = lines.map(function (l) {
       tot += +l.amount || 0;
-      return "<tr><td>" + esc(l.name) + (l.qty && l.qty !== 1 ? ' <span class="mut">× ' + esc(l.qty) + "</span>" : "") + "</td><td class=\"n\">" + nok(+l.amount || 0) + "</td></tr>";
+      return "<tr><td>" + esc(l.name) + (l.qty && l.qty !== 1 ? ' <span class="mut">× ' + esc(l.qty) + "</span>" : "") + "</td><td class=\"n\">" + money(+l.amount || 0) + "</td></tr>";
     });
-    box.innerHTML = "<table>" + rows.join("") + '<tr class="sum"><td>Sum</td><td class="n">' + nok(tot) + "</td></tr></table>";
+    box.innerHTML = "<table>" + rows.join("") + '<tr class="sum"><td>Sum</td><td class="n">' + money(tot) + "</td></tr></table>";
   }
-  items.forEach(function (li) {
+  items.concat(otherRows).forEach(function (li) {
     var head = li.querySelector(".head"), body = li.querySelector(".body"), box = li.querySelector(".lines");
     head.addEventListener("click", function () {
       var open = li.classList.toggle("open");
@@ -150,8 +151,8 @@
       if (open && url && !li.dataset.loaded) {
         li.dataset.loaded = "1";
         fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-          .then(function (d) { render(box, d.lines || []); })
-          .catch(function (e) { box.innerHTML = '<p class="err small">Kunne ikke hente varelinjer (' + esc(e.message) + ').</p>'; });
+          .then(function (d) { render(box, d.lines || [], d.currency || li.dataset.currency || (li.dataset.chain ? "NOK" : "")); })
+          .catch(function (e) { delete li.dataset.loaded; box.innerHTML = '<p class="err small">Kunne ikke hente varelinjer (' + esc(e.message) + ').</p>'; });
       }
     });
   });

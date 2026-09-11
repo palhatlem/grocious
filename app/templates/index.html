@@ -70,15 +70,19 @@
   </div>
   <ul class="receipts" id="other-receipt-list">
     {% for x in inbox_rows %}
-    <li class="receipt" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}"{% if loop.index > 20 %} hidden{% endif %}>
-      <a class="head" href="/inbox/{{ x.archive_id }}">
+    <li class="receipt" data-lines="/inbox/{{ x.archive_id }}.json" data-currency="{{ x.currency or '' }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}"{% if loop.index > 20 %} hidden{% endif %}>
+      <button class="head" type="button" aria-expanded="false">
         <span class="badge">Innboks</span>
         <span class="store">{{ x.store or x.intake.filename or 'Ukjent butikk' }}</span>
         <span class="date">{{ x.date|day if x.date else 'Ukjent dato' }}</span>
         <span class="amt" data-num>{{ x.amount|num(2) if x.amount is not none else '—' }} {{ x.currency or '' }}</span>
         <span class="extra mut">{{ 'Bekreftet' if x.review.state == 'confirmed' else 'Til gjennomgang' }}</span>
-        <span class="caret" aria-hidden="true">›</span>
-      </a>
+        <span class="caret" aria-hidden="true">▸</span>
+      </button>
+      <div class="body" hidden>
+        <div class="lines"><p class="mut small">Laster varelinjer …</p></div>
+        <div class="dl"><a href="/inbox/{{ x.archive_id }}">Åpne / rediger bilag</a><a href="/inbox/{{ x.archive_id }}.json">json</a><a href="/inbox/{{ x.archive_id }}.pdf">laget PDF</a></div>
+      </div>
     </li>
     {% else %}<li class="mut small">Ingen kvitteringer lagt inn ennå.</li>{% endfor %}
   </ul>
