@@ -124,7 +124,7 @@
         <span class="store">{{ x.store }}</span>
         <span class="date">{{ x.date|day }}</span>
         <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
-        <span class="extra pos" data-num>{% if x.bonus %}+{{ x.bonus|nok(2) }}{% endif %}</span>
+        <span class="extra pos" data-num>{% if x.bonus %}+{{ x.bonus|num(2) }}{% endif %}</span>
         <span class="caret" aria-hidden="true">▸</span>
       </button>
       <div class="body" hidden>
@@ -141,7 +141,7 @@
         <span class="store">{{ x.store }}</span>
         <span class="date">{{ x.date|dt }}</span>
         <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
-        <span class="extra pos" data-num>{% if x.discount %}−{{ x.discount|nok(2) }}{% endif %}</span>
+        <span class="extra pos" data-num>{% if x.discount %}−{{ x.discount|num(2) }}{% endif %}</span>
         <span class="caret" aria-hidden="true">▸</span>
       </button>
       <div class="body" hidden>
@@ -158,8 +158,8 @@
         <span class="date">{{ x.date|day }} {{ x.time or '' }}</span>
         <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
         <span class="extra coop-savings">
-          {% if x.list_bonus is not none %}<span class="pos">+{{ x.list_bonus|nok(2) }} bonus</span>{% endif %}
-          {% if x.list_discount is not none %}<span>−{{ x.list_discount|nok(2) }} rabatt</span>{% endif %}
+          {% if x.list_bonus is not none %}<span class="pos">+{{ x.list_bonus|num(2) }}</span>{% endif %}
+          {% if x.list_discount is not none %}<span>−{{ x.list_discount|num(2) }}</span>{% endif %}
           {% if x.validation and x.validation.issues %}<span class="err">kontrollavvik</span>{% endif %}
         </span>
         <span class="caret" aria-hidden="true">▸</span>
