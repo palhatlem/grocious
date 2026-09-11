@@ -184,3 +184,14 @@ states; `POST /api/bookkeeping/<source>/<archive_id>` accepts JSON with a boolea
 `registered` and an optional `reference` (up to 500 characters). The same deployment
 authentication as the rest of the app applies. Only archived receipts can be marked;
 linked/discarded inbox records cannot be marked as separate entries.
+
+### Optional Coop account estimate
+
+The private `bonus/coop-account-observation.json` can opt into
+`mode: "opening_plus_receipts"` with `balance`, `deposit`, `observed_at` and
+`receipts_from` (ISO date, inclusive). The account card then adds unique Coop
+receipt bonuses to that opening balance, excluding older and future receipts.
+The estimate includes the refundable membership deposit and is labelled as a
+calculation, not a bank-reported or withdrawable balance. Withdrawals and other
+account movements require a new opening balance/cutoff. Existing snapshot mode
+is unchanged when the option is absent.

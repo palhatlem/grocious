@@ -84,13 +84,51 @@ def coop_data():
             return {**old.get("metrics", {}), "bonus_stale": True, "bonus_error": "Could not refresh Coop bonus"}
 
 
+def account_rollforward(record, rows, today=None):
+    """A user-supplied opening balance plus unique receipt earnings, not bank availability."""
+    today = today or dt.datetime.now(dt.timezone.utc).astimezone().date()
+    start = dt.date.fromisoformat(record["receipts_from"])
+    opening = archive.minor(record["balance"])
+    deposit = archive.minor(record.get("deposit", 0))
+    seen, earned, missing = set(), 0, 0
+    for row in rows:
+        rid = row.get("archive_id")
+        date = (row.get("date") or "")[:10]
+        if not rid or rid in seen or not start.isoformat() <= date <= today.isoformat():
+            continue
+        seen.add(rid)
+        bonus = archive.minor(row.get("list_bonus"))
+        if bonus is None:
+            missing += 1
+        else:
+            earned += bonus
+    def nok(value):
+        return f"{value / 100:.2f}".replace(".", ",")
+    note = (
+        f"Saldoen inkluderer {nok(deposit)} kr medlemsinnskudd, som tilbakebetales ved avslutning. "
+        f"Startsaldo {nok(opening)} kr før handel {start.strftime('%d.%m.%Y')}, oppgitt av deg, "
+        f"pluss {nok(earned)} kr bonus fra kvitteringer fra og med denne datoen. "
+        "Kjøpeutbytte og kortbonus telles samlet; prisrabatter er ikke med. "
+        "Dette er beregnet saldo inkludert opptjent bonus, ikke bekreftet disponibelt beløp. "
+        "Ved uttak eller andre kontobevegelser må startsaldoen oppdateres."
+    )
+    if missing:
+        note += f" Bonus mangler på {missing} kvitteringer."
+    return {"account_balance": (opening + earned) / 100, "account_available": None,
+            "account_basis": "opening_plus_receipts", "account_observed_at": record["observed_at"],
+            "account_note": note}
+
+
 def account_observation(source):
-    """User-reported bank-authenticated figures are snapshots, never automatic balances."""
+    """Optional user-reported snapshot or explicitly configured receipt roll-forward."""
     if source != "coop":
         return {}
     path = Path(os.environ.get("GROCERY_DATA", "/data")) / "bonus" / "coop-account-observation.json"
     try:
         record = json.loads(path.read_text())
+        if record.get("mode") == "opening_plus_receipts":
+            from coop_receipt_ui import enrich
+            return account_rollforward(record, enrich(archive.summary("coop"))["receipts"])
         return {
             "account_balance": record["balance"],
             "account_available": record["available"],
