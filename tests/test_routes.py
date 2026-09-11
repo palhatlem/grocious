@@ -13,7 +13,7 @@ def test_index_renders_everything(client):
     assert 'id="theme"' in html and "Catppuccin Mocha" in html and 'value="auto"' in html
     assert "Tilbud &amp; kuponger" in html and "Aktiver" in html and "✓ Aktivert" in html
     assert 'data-chain="trumf"' in html and 'data-chain="rema"' in html
-    assert '<option value="2026-06">jun 2026</option>' in html
+    assert 'data-month="2026-06"' in html  # dates populate the shared period controls
     assert "412,37\u00a0kr" in html  # NOK format as in Porteføljen (nbsp before kr)
     assert "<style>" not in html  # no inline CSS left
 

@@ -30,12 +30,18 @@
   var otherRows = Array.prototype.slice.call(document.querySelectorAll("#other-receipt-list > .receipt"));
   var otherPage = 0, otherPrev = document.getElementById("other-prev"), otherNext = document.getElementById("other-next");
   function showOtherPage() {
-    otherRows.forEach(function (row, i) { row.hidden = i < otherPage * 20 || i >= (otherPage + 1) * 20; });
+    var visible = otherRows.filter(function (row) { return matchesExtra(row, "other-receipt-list"); });
+    otherPage = Math.min(otherPage, Math.max(0, Math.ceil(visible.length / 20) - 1));
+    otherRows.forEach(function (row) { row.hidden = true; });
+    visible.slice(otherPage * 20, (otherPage + 1) * 20).forEach(function (row) { row.hidden = false; });
     if (!otherPrev || !otherNext) return;
     otherPrev.hidden = otherPage === 0;
-    otherNext.hidden = (otherPage + 1) * 20 >= otherRows.length;
-    document.getElementById("other-page").textContent = otherRows.length ?
-      (otherPage * 20 + 1) + "–" + Math.min((otherPage + 1) * 20, otherRows.length) + " av " + otherRows.length : "";
+    otherNext.hidden = (otherPage + 1) * 20 >= visible.length;
+    otherPrev.parentElement.hidden = visible.length <= 20;
+    document.getElementById("other-page").textContent = visible.length ?
+      (otherPage * 20 + 1) + "–" + Math.min((otherPage + 1) * 20, visible.length) + " av " + visible.length : "Ingen treff";
+    var count = document.getElementById("other-filter-count");
+    if (count) count.textContent = visible.length + " kvitteringer";
   }
   if (otherPrev) otherPrev.addEventListener("click", function () { otherPage = Math.max(0, otherPage - 1); showOtherPage(); });
   if (otherNext) otherNext.addEventListener("click", function () { otherPage++; showOtherPage(); });
@@ -69,7 +75,7 @@
   function applyFilters() {
     var n = 0, sum = 0, bonus = 0, disc = 0;
     items.forEach(function (li) {
-      var show = (!chain || li.dataset.chain === chain) && (!month || li.dataset.month === month);
+      var show = (!chain || li.dataset.chain === chain) && (!month || li.dataset.month === month) && matchesExtra(li, "list");
       li.hidden = !show || n < page * pageSize || n >= (page + 1) * pageSize;
       if (show) { n++; sum += +li.dataset.amount || 0; bonus += +li.dataset.bonus || 0; disc += +li.dataset.discount || 0; }
     });
@@ -80,9 +86,9 @@
     if (totalsEl) totalsEl.textContent = n ? "Sum " + nok(sum) + (bonus ? " · bonus " + nok(bonus) : "") + (disc ? " · rabatt " + nok(disc) : "") : "";
     if (emptyEl) emptyEl.hidden = n > 0;
   }
-  document.querySelectorAll(".chips .chip").forEach(function (b) {
+  document.querySelectorAll(".chips .chip[data-chain]").forEach(function (b) {
     b.addEventListener("click", function () {
-      document.querySelectorAll(".chips .chip").forEach(function (x) { x.classList.remove("on"); });
+      document.querySelectorAll(".chips .chip[data-chain]").forEach(function (x) { x.classList.remove("on"); });
       b.classList.add("on"); chain = b.dataset.chain || ""; page = 0; applyFilters();
     });
   });
@@ -107,6 +113,103 @@
   if (prev) prev.addEventListener("click", function () { page--; applyFilters(); document.getElementById("receipts").scrollIntoView(); });
   if (next) next.addEventListener("click", function () { page++; applyFilters(); document.getElementById("receipts").scrollIntoView(); });
   applyFilters();
+
+
+  function todayOslo() {
+    return new Intl.DateTimeFormat("sv-SE", {timeZone: "Europe/Oslo", year: "numeric", month: "2-digit", day: "2-digit"}).format(new Date());
+  }
+  function matchesExtra(row, id) {
+    var controls = document.getElementById(id + "-filters");
+    if (!controls) return true;
+    var period = controls.dataset.period || "all", date = (row.dataset.date || "").slice(0, 10), today = todayOslo();
+    var current = today.slice(0, 7), year = today.slice(0, 4);
+    var previous = new Date(Date.UTC(Number(year), Number(today.slice(5, 7)) - 2, 1)).toISOString().slice(0, 7);
+    var inPeriod = period === "all" || (period === "unknown" ? !date : !!date && (
+      period === "current" ? date.slice(0, 7) === current && date <= today :
+      period === "previous" ? date.slice(0, 7) === previous :
+      period === "year" ? date.slice(0, 4) === year && date <= today :
+      period.length === 4 ? date.slice(0, 4) === period : date.slice(0, 7) === period));
+    var status = controls.querySelector("[data-registration-filter]").value;
+    return inPeriod && (status === "all" || row.dataset.registration === status);
+  }
+  function refreshReceiptFilters() { page = 0; otherPage = 0; applyFilters(); showOtherPage(); }
+  ["other-receipt-list", "list"].forEach(function (id) {
+    var target = document.getElementById(id);
+    if (!target) return;
+    var controls = document.createElement("div"); controls.id = id + "-filters"; controls.className = "receipt-filter-controls";
+    var periods = document.createElement("div"); periods.className = "period-buttons"; periods.setAttribute("aria-label", "Periode");
+    [["current","Denne måneden"],["previous","Forrige måned"],["year","Hittil i år"],["all","Alle"]].forEach(function (pair) {
+      var button = document.createElement("button"); button.type = "button"; button.className = "btn"; button.textContent = pair[1];
+      button.dataset.periodValue = pair[0]; button.setAttribute("aria-pressed", pair[0] === "all" ? "true" : "false");
+      button.onclick = function () { choose(pair[0]); }; periods.appendChild(button);
+    });
+    var select = document.createElement("select"); select.setAttribute("aria-label", "Velg måned eller år");
+    function option(value, label) { var o = document.createElement("option"); o.value = value; o.textContent = label; select.appendChild(o); }
+    option("all", "Velg måned / år"); option("unknown", "Ukjent dato");
+    var dates = Array.from(target.querySelectorAll(".receipt")).map(function (row) { return (row.dataset.date || "").slice(0, 7); }).filter(Boolean);
+    dates.push(todayOslo().slice(0, 7));
+    Array.from(new Set(dates.map(function (d) { return d.slice(0, 4); }))).sort().reverse().forEach(function (y) { option(y, "Hele " + y); });
+    Array.from(new Set(dates)).sort().reverse().forEach(function (d) {
+      option(d, new Intl.DateTimeFormat("nb-NO", {month:"long", year:"numeric", timeZone:"UTC"}).format(new Date(d + "-01T00:00:00Z")));
+    });
+    function choose(value) {
+      controls.dataset.period = value;
+      select.value = Array.from(select.options).some(function (o) {return o.value === value;}) ? value : "all";
+      periods.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.periodValue === value ? "true" : "false"); });
+      refreshReceiptFilters();
+    }
+    select.onchange = function () { choose(select.value); };
+    var registration = document.createElement("select"); registration.dataset.registrationFilter = "";
+    registration.setAttribute("aria-label", "Registrering i Beancount");
+    [["all","Alle registreringsstatuser"],["unregistered","Ikke registrert"],["registered","Registrert i Beancount"],["changed","Endret etter registrering"]].forEach(function (pair) {
+      var o = document.createElement("option"); o.value = pair[0]; o.textContent = pair[1]; registration.appendChild(o);
+    });
+    registration.onchange = refreshReceiptFilters;
+    controls.append(periods, select, registration);
+    if (id === "other-receipt-list") { var count = document.createElement("span"); count.id = "other-filter-count"; count.className = "mut small"; controls.appendChild(count); }
+    target.before(controls);
+  });
+  refreshReceiptFilters();
+  var allRows = items.concat(otherRows);
+  fetch("/api/bookkeeping").then(function (r) { if (!r.ok) throw new Error("Kunne ikke hente registreringsstatus"); return r.json(); }).then(function (records) {
+    var mapping = new Map(records.map(function (r) { return [r.source + "/" + r.id, r]; }));
+    allRows.forEach(function (row) {
+      var record = mapping.get(row.dataset.source + "/" + row.dataset.id);
+      var box = document.createElement("div"); box.className = "registration-controls";
+      row.querySelector(".body").appendChild(box);
+      if (!record) { row.dataset.registration = "unregistered"; box.textContent = "Bilaget må være i arkivet før det kan merkes registrert."; return; }
+      var status = document.createElement("span"), reference = document.createElement("input"), button = document.createElement("button"), undo = document.createElement("button"), error = document.createElement("span");
+      status.setAttribute("role", "status"); reference.placeholder = "Beancount-referanse (valgfri)"; reference.setAttribute("aria-label", "Beancount-referanse"); reference.maxLength = 500;
+      button.type = undo.type = "button"; button.className = undo.className = "btn"; undo.textContent = "Angre registrering"; error.className = "err small";
+      var badge = document.createElement("span"); badge.className = "registration-badge"; row.querySelector(".store").appendChild(badge);
+      function update(value) {
+        record = Object.assign(record, value); row.dataset.registration = record.state;
+        badge.textContent = record.state === "registered" ? " · Registrert" : record.state === "changed" ? " · Endret etter registrering" : "";
+        status.textContent = record.state === "unregistered" ? "Ikke registrert i Beancount" :
+          (record.state === "changed" ? "Endret etter registrering" : "Registrert i Beancount") + " · " + new Date(record.registered_at).toLocaleDateString("nb-NO");
+        reference.value = record.reference || ""; button.textContent = record.state === "changed" ? "Marker endringen som ført" : record.state === "registered" ? "Oppdater referanse" : "Registrert i Beancount";
+        undo.hidden = record.state === "unregistered";
+      }
+      async function save(registered) {
+        button.disabled = undo.disabled = true; error.textContent = "";
+        try {
+          var response = await fetch("/api/bookkeeping/" + record.source + "/" + record.archive_id, {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({registered:registered, reference:reference.value})});
+          var value = await response.json(); if (!response.ok) throw new Error(value.error || "Lagring feilet");
+          update(value); refreshReceiptFilters();
+        } catch (e) { error.textContent = e.message; }
+        finally { button.disabled = undo.disabled = false; }
+      }
+      button.onclick = function () { save(true); }; undo.onclick = function () { save(false); };
+      var hint = document.createElement("small"); hint.className = "mut"; hint.textContent = "Manuell huskelapp — ingen bankavstemming eller endring i eksporten.";
+      box.append(status, reference, button, undo, hint, error); update(record);
+    });
+    refreshReceiptFilters();
+  }).catch(function () {
+    document.querySelectorAll(".receipt-filter-controls").forEach(function (controls) {
+      var error = document.createElement("span"); error.className = "err small"; error.textContent = "Registreringsstatus kunne ikke lastes. Last siden på nytt."; controls.appendChild(error);
+      controls.querySelector("[data-registration-filter]").disabled = true;
+    });
+  });
 
   var hiddenOffers = [], offerKey = "grocious.hiddenOffers";
   try { var stored = JSON.parse(localStorage.getItem(offerKey) || "[]"); if (Array.isArray(stored)) hiddenOffers = stored; } catch (e) {}

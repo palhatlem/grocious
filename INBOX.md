@@ -165,3 +165,22 @@ intake before the worker moves it to Done; it never resets review status or auto
 This prevents future replay duplicates; it does not merge already-created duplicates or treat an email,
 an invoice attachment and a receipt attachment as one purchase. Those distinct documents still require
 review to avoid treating multiple documents for the same purchase as multiple expenses.
+
+### Manual bookkeeping markers
+
+Both homepage receipt lists have purchase-date filters (current month through today,
+previous month, year to date, a selected month/year, or unknown date). Relative periods
+use Europe/Oslo. Sorting and pagination apply to the filtered selection.
+
+“Registrert i Beancount” is a manual reminder, separate from receipt review status
+and bank reconciliation. It stores an optional posting reference and registration time.
+“Angre registrering” removes the active mark while preserving its history. Changed
+purchase date, store, amount, currency, lines or payment fields show “Endret etter
+registrering”; the user can mark the updated posting as entered after reviewing it.
+
+Markers live in `GROCERY_DATA/bookkeeping/<source>/<archive_id>.json`, outside the
+receipt originals. They never change receipt exports. `GET /api/bookkeeping` lists
+states; `POST /api/bookkeeping/<source>/<archive_id>` accepts JSON with a boolean
+`registered` and an optional `reference` (up to 500 characters). The same deployment
+authentication as the rest of the app applies. Only archived receipts can be marked;
+linked/discarded inbox records cannot be marked as separate entries.

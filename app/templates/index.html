@@ -70,7 +70,7 @@
   </div>
   <ul class="receipts" id="other-receipt-list">
     {% for x in inbox_rows %}
-    <li class="receipt" data-lines="/inbox/{{ x.archive_id }}.json" data-currency="{{ x.currency or '' }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}"{% if loop.index > 20 %} hidden{% endif %}>
+    <li class="receipt" data-source="inbox" data-id="{{ x.id }}" data-lines="/inbox/{{ x.archive_id }}.json" data-currency="{{ x.currency or '' }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}"{% if loop.index > 20 %} hidden{% endif %}>
       <button class="head" type="button" aria-expanded="false">
         <span class="badge">Innboks</span>
         <span class="store">{{ x.store or x.intake.filename or 'Ukjent butikk' }}</span>
@@ -103,10 +103,7 @@
       <button class="chip" data-chain="rema">Rema</button>
       <button class="chip" data-chain="coop">Coop</button>
     </div>
-    <select id="month" aria-label="Måned">
-      <option value="">Alle måneder</option>
-      {% for m in months %}<option value="{{ m.ym }}">{{ m.label }}</option>{% endfor %}
-    </select>
+
     <span class="count mut small" id="count"></span>
     <label class="sort-pick" title="Sorter kvitteringer">
     <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h11M4 18h6"/></svg>
@@ -120,7 +117,7 @@
   <div class="totals small mut" id="totals"></div>
   <ul class="receipts" id="list">
     {% if t.ok %}{% for x in t.receipts %}
-    <li class="receipt" data-chain="trumf" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-bonus="{{ x.bonus if x.bonus is not none else '' }}"
+    <li class="receipt" data-source="trumf" data-id="{{ x.id }}" data-chain="trumf" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-bonus="{{ x.bonus if x.bonus is not none else '' }}"
         data-lines="{% if x.hasReceipt %}/trumf/receipt/{{ x.id }}.json{% endif %}">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge trumf">{{ x.chain or 'Trumf' }}</span>
@@ -137,7 +134,7 @@
     </li>
     {% endfor %}{% endif %}
     {% if r.ok %}{% for x in r.receipts %}
-    <li class="receipt" data-chain="rema" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-discount="{{ x.discount if x.discount is not none else '' }}"
+    <li class="receipt" data-source="rema" data-id="{{ x.id }}" data-chain="rema" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-discount="{{ x.discount if x.discount is not none else '' }}"
         data-lines="/rema/receipt/{{ x.id }}.json">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge rema">Rema</span>

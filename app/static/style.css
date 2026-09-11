@@ -200,3 +200,11 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 /* Keep expanded line tables inside the review panel on narrow screens. */
 .inbox-review > *, .inbox-fields, .inbox-fields > * { min-width: 0; }
 .inbox-line-details { max-width: 100%; }
+.receipt-filter-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0; }
+.period-buttons { display:flex; flex-wrap:wrap; gap:6px; }
+.period-buttons [aria-pressed="true"] { background:var(--accent); color:var(--bg); }
+.receipt-filter-controls select, .registration-controls input { background:var(--card2); color:var(--fg); border:1px solid var(--line); border-radius:8px; padding:7px; font:inherit; max-width:100%; }
+.receipt-filter-controls option { background:var(--card); color:var(--fg); }
+.registration-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
+.registration-controls > small, .registration-controls > [role="status"] { flex-basis:100%; }
+.registration-badge { font-size:.75rem; color:var(--mut); font-weight:normal; }
