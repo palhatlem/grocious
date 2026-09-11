@@ -25,7 +25,10 @@ app.register_blueprint(bookkeeping.bp)
 
 @app.context_processor
 def navigation_context():
-    return {"navigation": navigation.load()}
+    return {"navigation": navigation.load(), "inbox_pending_count": sum(
+        row.get("review", {}).get("state") == "needs_review"
+        for row in receipt_archive.summary("inbox")["receipts"]
+    )}
 
 
 def _cache(ttl):
