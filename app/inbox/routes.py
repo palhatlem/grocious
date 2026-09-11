@@ -1,6 +1,7 @@
 """Inbox web routes. No remote URL fetching and no active mail/HTML rendering."""
 
 import io
+from datetime import datetime
 import json
 from flask import Blueprint, abort, jsonify, redirect, render_template, request, send_file
 from werkzeug.exceptions import RequestEntityTooLarge
@@ -132,6 +133,12 @@ def corrections(rid):
     values = request.get_json() if request.is_json else request.form.to_dict()
     if not isinstance(values, dict):
         raise ValueError("Ugyldige korrigeringer")
+    if not request.is_json and "date_local" in values:
+        local_date = values.pop("date_local").strip().replace("/", ".")
+        try:
+            values["date"] = datetime.strptime(local_date, "%d.%m.%Y").date().isoformat() if local_date else None
+        except ValueError as e:
+            raise ValueError("Dato må være en gyldig dato i formatet DD.MM.ÅÅÅÅ") from e
     if not request.is_json:
         keys = ("method", "card_last4", "terminal", "auth_code")
         if any("payment_" + k in values for k in keys):

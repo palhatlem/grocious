@@ -32,15 +32,17 @@
 {% if r.validation.reconciliation == 'lines_plus_tax' %}<p class="mut small">Varelinjer + oppgitt MVA stemmer med totalbeløpet.</p>{% endif %}
 <form method="post" action="/inbox/{{ r.archive_id }}/corrections" class="inbox-fields">
 <label>Butikk<input name="store" value="{{ r.store or '' }}"></label>
-<label>Dato<input type="date" name="date" value="{{ r.date or '' }}"></label>
+<label>Dato (DD.MM.ÅÅÅÅ)<input type="text" name="date_local" inputmode="numeric" placeholder="DD.MM.ÅÅÅÅ" pattern="[0-9]{2}[./][0-9]{2}[./][0-9]{4}" value="{{ r.date[8:10] ~ '.' ~ r.date[5:7] ~ '.' ~ r.date[:4] if r.date else '' }}" title="Dag, måned, år — for eksempel 08.09.2026"></label>
 <label>Tid<input type="time" name="time" value="{{ r.time or '' }}"></label>
 <label>Totalbeløp<input name="amount" inputmode="decimal" value="{{ r.amount if r.amount is not none else '' }}"></label>
 <label>Valuta<input name="currency" value="{{ r.currency or '' }}" placeholder="NOK"></label>
 <label>Kategori<select name="category">{% for c in categories %}<option {{ 'selected' if r.category==c }}>{{ c }}</option>{% endfor %}</select></label>
 <details><summary>Betaling</summary>{% for field,label in [('method','Betalingsmåte'),('card_last4','Kortets siste fire siffer'),('terminal','Terminal'),('auth_code','Autorisasjonskode')] %}<label>{{ label }}<input name="payment_{{ field }}" value="{{ r.payment.get(field) or '' if r.payment is mapping else '' }}" {% if field=='card_last4' %}maxlength="4" pattern="[0-9]{4}" inputmode="numeric"{% endif %}></label>{% endfor %}</details>
 <label>Notat<textarea name="note">{{ r.note or '' }}</textarea></label>
+<details class="inbox-line-details"><summary>Detaljspesifikasjon / varelinjer ({{ r.lines|length }})</summary>
 <div class="inbox-line-scroll"><table data-line-editor><thead><tr><th>Vare</th><th>Antall</th><th>Enhet</th><th>Beløp</th><th>Rabatt</th><th>Type</th><th></th></tr></thead><tbody></tbody></table></div>
 <input type="hidden" name="lines" id="lines-value" value="{{ lines_json }}"><button type="button" class="btn" id="add-line">Legg til vare</button>
+</details>
 <script type="application/json" id="inbox-lines">{{ r.lines|tojson }}</script>
 <script src="/static/inbox.js" defer></script>
 <button class="btn">Lagre endringer</button></form>

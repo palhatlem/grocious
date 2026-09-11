@@ -39,7 +39,21 @@
   }
   if (otherPrev) otherPrev.addEventListener("click", function () { otherPage = Math.max(0, otherPage - 1); showOtherPage(); });
   if (otherNext) otherNext.addEventListener("click", function () { otherPage++; showOtherPage(); });
-  showOtherPage();
+  var otherSort = document.getElementById("other-sort");
+  function sortOther() {
+    var parts = otherSort.value.split("-"), key = parts[0], direction = parts[1] === "asc" ? 1 : -1;
+    otherRows.sort(function (a, b) {
+      var x = a.dataset[key], y = b.dataset[key];
+      if (!x !== !y) return !x ? 1 : -1;
+      var cmp = !x ? 0 : key === "amount" ? Number(x) - Number(y) : x.localeCompare(y, "nb", {numeric: true, sensitivity: "base"});
+      return cmp * direction || b.dataset.date.localeCompare(a.dataset.date);
+    });
+    otherRows.forEach(function (row) { document.getElementById("other-receipt-list").appendChild(row); });
+    otherPage = 0;
+    showOtherPage();
+  }
+  if (otherSort) { otherSort.addEventListener("change", sortOther); sortOther(); }
+  else showOtherPage();
 
   // ---- filters ----------------------------------------------------------
   var nokFmt = new Intl.NumberFormat("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });

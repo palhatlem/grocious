@@ -313,3 +313,22 @@ def test_chain_export_has_integer_amounts(client, inbox_data):
         for line in r.get("lines", []):
             assert line["amount_minor"] is None or isinstance(line["amount_minor"], int)
     assert response["total_minor"] == sum(r["amount_minor"] for r in response["receipts"])
+
+
+@pytest.mark.parametrize(
+    'entered,expected',
+    [('08.09.2026', '2026-09-08'), ('09/08/2026', '2026-08-09'), ('29.02.2028', '2028-02-29')],
+)
+def test_local_date_correction(client, inbox_data, entered, expected):
+    rid = store.ingest(b'Test receipt\nTOTALT 500,00 NOK')['rid']
+    original = (archive.folder('inbox', rid) / 'receipt.json').read_bytes()
+    response = client.post('/inbox/' + rid + '/corrections', data={'date_local': entered})
+    assert response.status_code == 303
+    assert archive.read_receipt('inbox', rid)['date'] == expected
+    assert (archive.folder('inbox', rid) / 'receipt.json').read_bytes() == original
+
+
+@pytest.mark.parametrize('entered', ['31.02.2026', '09/31/2026', '2026-09-08'])
+def test_invalid_local_date(client, inbox_data, entered):
+    rid = store.ingest(b'Test receipt\nTOTALT 500,00 NOK')['rid']
+    assert client.post('/inbox/' + rid + '/corrections', data={'date_local': entered}).status_code == 400
