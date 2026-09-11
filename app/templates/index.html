@@ -76,7 +76,7 @@
         <span class="store">{{ x.store or x.intake.filename or 'Ukjent butikk' }}</span>
         <span class="date">{{ x.date|day if x.date else 'Ukjent dato' }}</span>
         <span class="amt" data-num>{{ x.amount|num(2) if x.amount is not none else '—' }} {{ x.currency or '' }}</span>
-        <span class="extra mut">{{ 'Bekreftet' if x.review.state == 'confirmed' else 'Til gjennomgang' }}</span>
+        <span class="extra mut">{% if x.review.state != 'confirmed' %}Til gjennomgang{% endif %}</span>
         <span class="caret" aria-hidden="true">▸</span>
       </button>
       <div class="body" hidden>
