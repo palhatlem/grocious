@@ -185,6 +185,12 @@
       function update(value) {
         record = Object.assign(record, value); row.dataset.registration = record.state;
         badge.textContent = record.state === "registered" ? " · Registrert" : record.state === "changed" ? " · Endret etter registrering" : "";
+        var dot = row.dataset.source === "inbox" && record.state === "registered";
+        badge.classList.toggle("registration-dot", dot);
+        if (dot) badge.textContent = "";
+        badge.title = dot ? "Registrert i Beancount" : "";
+        if (dot) { badge.setAttribute("role", "img"); badge.setAttribute("aria-label", "Registrert i Beancount"); }
+        else { badge.removeAttribute("role"); badge.removeAttribute("aria-label"); }
         status.textContent = record.state === "unregistered" ? "Ikke registrert i Beancount" :
           (record.state === "changed" ? "Endret etter registrering" : "Registrert i Beancount") + " · " + new Date(record.registered_at).toLocaleDateString("nb-NO");
         reference.value = record.reference || ""; button.textContent = record.state === "changed" ? "Marker endringen som ført" : record.state === "registered" ? "Oppdater referanse" : "Registrert i Beancount";
