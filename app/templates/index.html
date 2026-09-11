@@ -159,7 +159,7 @@
         <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
         <span class="extra coop-savings">
           {% if x.list_bonus is not none %}<span class="pos">+{{ x.list_bonus|num(2) }}</span>{% endif %}
-          {% if x.list_discount is not none %}<span>−{{ x.list_discount|num(2) }}</span>{% endif %}
+          {% if x.list_discount is not none %}<span class="pos">−{{ x.list_discount|num(2) }}</span>{% endif %}
           {% if x.validation and x.validation.issues %}<span class="err">kontrollavvik</span>{% endif %}
         </span>
         <span class="caret" aria-hidden="true">▸</span>
