@@ -117,7 +117,7 @@
   <div class="totals small mut" id="totals"></div>
   <ul class="receipts" id="list">
     {% if t.ok %}{% for x in t.receipts %}
-    <li class="receipt" data-source="trumf" data-id="{{ x.id }}" data-chain="trumf" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-bonus="{{ x.bonus if x.bonus is not none else '' }}"
+    <li class="receipt" data-source="trumf" data-id="{{ x.id }}" data-chain="trumf" data-month="{{ x.date[:7] }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-bonus="{{ x.bonus if x.bonus is not none else '' }}"
         data-lines="{% if x.hasReceipt %}/trumf/receipt/{{ x.id }}.json{% endif %}">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge trumf">{{ x.chain or 'Trumf' }}</span>
@@ -134,7 +134,7 @@
     </li>
     {% endfor %}{% endif %}
     {% if r.ok %}{% for x in r.receipts %}
-    <li class="receipt" data-source="rema" data-id="{{ x.id }}" data-chain="rema" data-month="{{ x.date[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-discount="{{ x.discount if x.discount is not none else '' }}"
+    <li class="receipt" data-source="rema" data-id="{{ x.id }}" data-chain="rema" data-month="{{ x.date[:7] }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-discount="{{ x.discount if x.discount is not none else '' }}"
         data-lines="/rema/receipt/{{ x.id }}.json">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge rema">Rema</span>
@@ -151,7 +151,7 @@
     </li>
     {% endfor %}{% endif %}
     {% for x in c.receipts %}
-    <li class="receipt" data-chain="coop" data-bonus="{{ x.bonus if x.bonus is not none else '' }}" data-month="{{ (x.date or '')[:7] }}" data-date="{{ x.date }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-lines="/coop/receipt/{{ x.archive_id }}.json">
+    <li class="receipt" data-source="coop" data-id="{{ x.id }}" data-chain="coop" data-bonus="{{ x.bonus if x.bonus is not none else '' }}" data-month="{{ (x.date or '')[:7] }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-lines="/coop/receipt/{{ x.archive_id }}.json">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge coop">Coop</span>
         <span class="store">{{ x.store }}</span>
