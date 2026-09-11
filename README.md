@@ -1,5 +1,7 @@
 # grocious
 
+Current release: **0.1**. See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 <img src="app/static/brand/grocious-readme.png" alt="grocious" width="560">
 
 **Your groceries. Your receipts. Your overview.**
