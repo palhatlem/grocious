@@ -151,16 +151,21 @@
     </li>
     {% endfor %}{% endif %}
     {% for x in c.receipts %}
-    <li class="receipt" data-source="coop" data-id="{{ x.id }}" data-chain="coop" data-bonus="{{ x.bonus if x.bonus is not none else '' }}" data-month="{{ (x.date or '')[:7] }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-lines="/coop/receipt/{{ x.archive_id }}.json">
+    <li class="receipt" data-source="coop" data-id="{{ x.id }}" data-chain="coop" data-bonus="{{ x.list_bonus if x.list_bonus is not none else '' }}" data-discount="{{ x.list_discount if x.list_discount is not none else '' }}" data-month="{{ (x.date or '')[:7] }}" data-date="{{ x.date or '' }}" data-store="{{ x.store or '' }}" data-amount="{{ x.amount if x.amount is not none else '' }}" data-lines="/coop/receipt/{{ x.archive_id }}.json">
       <button class="head" type="button" aria-expanded="false">
         <span class="badge coop">Coop</span>
         <span class="store">{{ x.store }}</span>
         <span class="date">{{ x.date|day }} {{ x.time or '' }}</span>
         <span class="amt" data-num>{{ x.amount|nok(2) }}</span>
-        <span class="extra mut">{% if x.validation and x.validation.issues %}kontrollavvik{% endif %}</span>
+        <span class="extra coop-savings">
+          {% if x.list_bonus is not none %}<span class="pos">+{{ x.list_bonus|nok(2) }} bonus</span>{% endif %}
+          {% if x.list_discount is not none %}<span>−{{ x.list_discount|nok(2) }} rabatt</span>{% endif %}
+          {% if x.validation and x.validation.issues %}<span class="err">kontrollavvik</span>{% endif %}
+        </span>
         <span class="caret" aria-hidden="true">▸</span>
       </button>
       <div class="body" hidden>
+        {% if x.bonus_parts %}<p class="mut small">{% for part in x.bonus_parts %}{{ part.label }}: {{ part.amount|nok(2) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
         <div class="lines"><p class="mut small">Laster varelinjer …</p></div>
         <div class="dl"><a href="/coop/receipt/{{ x.archive_id }}">Detaljer</a><a href="/coop/receipt/{{ x.archive_id }}.pdf">Original PDF</a><a href="/coop/receipt/{{ x.archive_id }}.json">json</a><a href="/coop/receipt/{{ x.archive_id }}.csv">csv</a></div>
       </div>

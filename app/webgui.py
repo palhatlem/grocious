@@ -8,6 +8,7 @@ from flask import Flask, Response, render_template, redirect, abort, request, js
 import receipt_archive
 import navigation
 import bookkeeping
+import coop_receipt_ui
 from inbox import store as inbox_store
 from inbox.routes import bp as inbox_bp
 import demo, themes, ui, dashboard_stats, bonus_sources, offers as offer_ui
@@ -216,7 +217,7 @@ def coop_offers():
     return {"offers": []} if DEMO else offer_ui.coop_data()
 
 def coop_dashboard():
-    return {**receipt_archive.summary('coop'), **coop_bonus(), **coop_offers(), **({} if DEMO else bonus_sources.account_observation('coop'))}
+    return {**coop_receipt_ui.enrich(receipt_archive.summary('coop')), **coop_bonus(), **coop_offers(), **({} if DEMO else bonus_sources.account_observation('coop'))}
 
 @app.route("/")
 def index():

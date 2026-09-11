@@ -208,3 +208,5 @@ table.data .n { text-align: right; font-variant-numeric: tabular-nums; white-spa
 .registration-controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; border-top:1px solid var(--line); padding-top:12px; margin-top:12px; }
 .registration-controls > small, .registration-controls > [role="status"] { flex-basis:100%; }
 .registration-badge { font-size:.75rem; color:var(--mut); font-weight:normal; }
+.coop-savings { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:2px 8px; }
+@media (max-width:600px) { .coop-savings { flex-direction:column; } }
