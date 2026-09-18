@@ -114,6 +114,12 @@ def summary(source):
     p=root()/source/'index.json'
     if not p.exists():return {'ok':False,'count':0,'receipts':[],'status':{'state':'not_started'}}
     data=json.loads(p.read_text());status=root()/source/'status.json'
+    if source=='coop':
+        from coop_duplicates import collapse
+        data['archive_record_count']=data.get('archive_record_count',data['count'])
+        data['receipts']=collapse(data['receipts'])
+        data['count']=len(data['receipts'])
+        data['duplicate_count']=data['archive_record_count']-data['count']
     data['status']=json.loads(status.read_text()) if status.exists() else {}
     images=root()/source/'images_status.json'
     if images.exists():data['image_status']=json.loads(images.read_text())
@@ -125,8 +131,26 @@ def rebuild(source):
         r=read_receipt(source,p.parent.name)
         records.append({k:r.get(k) for k in ('archive_id','id','date','time','store','amount','bonus','discount','receipt_id','validation','documents','amount_minor','currency','category','chain','review','intake','linked_to','payment')})
     records.sort(key=lambda x:(x['date'] or '',x['time'] or '',x['id']),reverse=True)
-    atomic_json(root()/source/'index.json',{'ok':True,'count':len(records),'receipts':records})
-    return len(records)
+    physical_count=len(records)
+    data={'ok':True,'count':physical_count,'receipts':records}
+    if source=='coop':
+        from coop_duplicates import collapse
+        previous=summary(source)['receipts']
+        data['receipts']=collapse(records,previous)
+        data.update(count=len(data['receipts']),archive_record_count=physical_count,
+                    duplicate_count=physical_count-len(data['receipts']))
+    atomic_json(root()/source/'index.json',data)
+    # Sync progress still counts preserved physical archive records.
+    return physical_count
+
+def receipt_aliases(source,rid):
+    """Canonical ID first, followed by preserved aliases of a verified duplicate."""
+    folder(source,rid)
+    if source=='coop':
+        for row in summary(source)['receipts']:
+            ids=[row['archive_id']]+[r['archive_id'] for r in row.get('duplicate_aliases',[])]
+            if rid in ids:return ids
+    return [rid]
 
 def document(source,rid,filename):
     r=read_receipt(source,rid)

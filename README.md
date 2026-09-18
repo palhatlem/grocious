@@ -48,9 +48,13 @@ folder under `data/receipts/<source>/<archive_id>/`:
 
 - **Originals are never modified or deleted.** Files are named by their SHA-256 and
   written once; a changed original becomes a new file next to the old one.
-- **`archive_id`** is a stable receipt key — SHA-256 of the chain name plus the chain's own
-  receipt id — so the same purchase always resolves to the same folder. Re-running a fetch
-  is idempotent.
+- **`archive_id`** is SHA-256 of the chain name plus the provider's source ID (Coop's
+  `summaryId`). Re-running a fetch with the same source ID is idempotent.
+- Coop can issue different source IDs for the same purchase. Listings, totals and exports
+  collapse records only when `receipt_id`, original PDF checksum, date, amount and currency
+  agree. The index retains `duplicate_aliases`, `archive_record_count` and `duplicate_count`;
+  all original folders and download URLs remain available. Manual registration follows the
+  purchase across aliases, using the most recent registration action.
 - **`receipt.json`** holds normalised fields next to the untouched `source` payload. Unknown
   vendor fields are preserved rather than dropped, and `documents[]` lists every stored file
   with its `role`, `filename`, `sha256`, `bytes` and `mimetype`.

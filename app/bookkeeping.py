@@ -24,14 +24,17 @@ def fingerprint(record):
                                     ensure_ascii=False).encode()).hexdigest()
 
 
-def state(source, rid):
-    p = path(source, rid)
-    if not p.exists():
-        return {'state': 'unregistered'}
-    marker = json.loads(p.read_text())
+def latest_marker(source, ids):
+    markers = [json.loads(p.read_text()) for rid in ids if (p := path(source, rid)).exists()]
+    return max(markers, key=lambda m: m.get('registered_at', ''), default={})
+
+
+def state(source, rid, ids=None):
+    ids = ids or archive.receipt_aliases(source, rid)
+    marker = latest_marker(source, ids)
     if not marker.get('registered'):
         return {'state': 'unregistered'}
-    current = archive.read_receipt(source, rid)
+    current = archive.read_receipt(source, ids[0])
     return {'state': 'registered' if marker['fingerprint'] == fingerprint(current) else 'changed',
             'registered_at': marker['registered_at'], 'reference': marker.get('reference', '')}
 
@@ -42,7 +45,8 @@ def listing():
     for source in sorted(archive.SOURCES):
         for row in archive.summary(source)['receipts']:
             rid = row['archive_id']
-            result.append({'source': source, 'id': str(row['id']), 'archive_id': rid, **state(source, rid)})
+            ids = [rid] + [r['archive_id'] for r in row.get('duplicate_aliases', [])]
+            result.append({'source': source, 'id': str(row['id']), 'archive_id': rid, **state(source, rid, ids)})
     return jsonify(result)
 
 
@@ -60,6 +64,8 @@ def save(source, rid):
     if not isinstance(reference, str) or len(reference) > 500:
         return jsonify(error='Referansen kan være opptil 500 tegn.'), 400
     try:
+        ids = archive.receipt_aliases(source, rid)
+        rid = ids[0]
         target = path(source, rid)
         record = archive.read_receipt(source, rid)
     except (ValueError, FileNotFoundError):
@@ -69,7 +75,7 @@ def save(source, rid):
     target.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     with target.with_suffix('.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        previous = json.loads(target.read_text()) if target.exists() else {}
+        previous = latest_marker(source, ids)
         now = dt.datetime.now(dt.timezone.utc).isoformat()
         entry = {'registered': data['registered'], 'registered_at': now,
                  'reference': reference.strip(), 'fingerprint': fingerprint(record)}
